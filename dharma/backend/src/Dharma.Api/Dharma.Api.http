@@ -1,6 +1,0 @@
-@Dharma.Api_HostAddress = http://localhost:5016
-
-GET {{Dharma.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

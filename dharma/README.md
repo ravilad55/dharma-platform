@@ -10,16 +10,18 @@ Dharma is a spiritual-services marketplace with a React Native customer app and 
 
 ## Local development
 
+See [docs/development/local-development.md](docs/development/local-development.md) for prerequisites, infrastructure, API, migration, mobile, and QA commands.
+
 Start infrastructure:
 
 ```bash
 docker compose up -d
 ```
 
-Build the backend:
+Build the .NET 8 backend:
 
 ```bash
-dotnet build backend/Dharma.sln
+dotnet build backend/Dharma.sln --no-restore
 ```
 
 Run the mobile app after installing dependencies:
@@ -30,4 +32,4 @@ npm install
 npm start
 ```
 
-Copy `.env.example` to `.env` and provide local service configuration before connecting the applications to external services.
+Copy `.env.example` to `.env` when overriding local service configuration. Production secrets must be injected by the deployment environment.

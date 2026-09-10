@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore backend
+        run: dotnet restore backend/Dharma.sln
+      - name: Build backend
+        run: dotnet build backend/Dharma.sln --no-restore --configuration Release
+      - name: Unit tests
+        run: dotnet test backend/tests/Dharma.Unit.Tests/Dharma.Unit.Tests.csproj --no-build --no-restore --configuration Release
+      - name: Architecture tests
+        run: dotnet test backend/tests/Dharma.Architecture.Tests/Dharma.Architecture.Tests.csproj --no-build --no-restore --configuration Release
+      - name: Integration and API contract tests
+        run: dotnet test backend/tests/Dharma.Integration.Tests/Dharma.Integration.Tests.csproj --no-build --no-restore --configuration Release
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci
+      - name: TypeScript validation
+        working-directory: mobile
+        run: npm run typecheck
+      - name: ESLint
+        working-directory: mobile
+        run: npm run lint
+      - name: Mobile tests
+        working-directory: mobile
+        run: npm test -- --runInBand
+      - name: Critical vulnerability gate
+        working-directory: mobile
+        run: npm audit --audit-level=critical
+
+  infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Docker Compose
+        run: docker compose config

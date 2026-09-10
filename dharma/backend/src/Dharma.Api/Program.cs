@@ -1,21 +1,38 @@
+using Dharma.Api.Endpoints;
+using Dharma.Api.Middleware;
+using Dharma.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddHealthChecks();
+builder.Services.AddDharmaInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseExceptionHandler();
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseStatusCodePages(async statusCodeContext =>
 {
-    app.MapOpenApi();
-}
-
-app.UseAuthorization();
+    var response = statusCodeContext.HttpContext.Response;
+    var request = statusCodeContext.HttpContext.Request;
+    if (response.StatusCode == StatusCodes.Status404NotFound && request.Path.StartsWithSegments("/api"))
+    {
+        await Results.Problem(
+            statusCode: StatusCodes.Status404NotFound,
+            title: "Resource not found",
+            type: "https://api.dharma.local/problems/not-found",
+            instance: request.Path,
+            extensions: new Dictionary<string, object?> { ["correlationId"] = request.HttpContext.TraceIdentifier })
+            .ExecuteAsync(request.HttpContext);
+    }
+});
 
 app.MapControllers();
+app.MapFoundationEndpoints();
 
 app.Run();
+
+public partial class Program;
