@@ -1,6 +1,7 @@
 using Dharma.Infrastructure.Messaging;
 using Dharma.Infrastructure.Persistence;
 using Dharma.Infrastructure.Redis;
+using Dharma.Identity.Infrastructure;
 using Dharma.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,8 +12,9 @@ namespace Dharma.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddDharmaInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDharmaInfrastructure(this IServiceCollection services, IConfiguration configuration, Microsoft.Extensions.Hosting.IHostEnvironment environment)
     {
+        services.AddIdentityInfrastructure(configuration, environment);
         var connectionString = configuration.GetConnectionString("Default");
         if (!string.IsNullOrWhiteSpace(connectionString))
         {
@@ -34,4 +36,5 @@ public static class DependencyInjection
 
         return services;
     }
+
 }

@@ -1,19 +1,42 @@
 using Dharma.Api.Endpoints;
 using Dharma.Api.Middleware;
 using Dharma.Infrastructure;
+using Dharma.Identity.Application;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
 builder.Services.AddControllers();
+var authPolicy = builder.Configuration.GetSection("Authentication").Get<AuthPolicyOptions>() ?? new AuthPolicyOptions();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = authPolicy.Issuer,
+        ValidateAudience = true,
+        ValidAudience = authPolicy.Audience,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("development-only-ephemeral-signing-key-change-me")),
+        NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub,
+        RoleClaimType = System.Security.Claims.ClaimTypes.Role
+    };
+});
+builder.Services.AddAuthorization();
 builder.Services.AddHealthChecks();
-builder.Services.AddDharmaInfrastructure(builder.Configuration);
+builder.Services.AddDharmaInfrastructure(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseStatusCodePages(async statusCodeContext =>
 {
     var response = statusCodeContext.HttpContext.Response;

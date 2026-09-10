@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Dharma.Identity.Domain.csproj" />
+    <ProjectReference Include="..\..\Dharma.Shared\Dharma.Shared.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

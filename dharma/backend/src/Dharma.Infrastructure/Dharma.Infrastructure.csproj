@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dharma.Shared\Dharma.Shared.csproj" />
+    <ProjectReference Include="..\Identity\Infrastructure\Dharma.Identity.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
