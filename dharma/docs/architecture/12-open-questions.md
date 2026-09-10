@@ -1,43 +1,34 @@
 # 12 Open Questions
 
-These questions are intentionally unresolved because the requirements do not provide a definitive answer. They must be answered before the affected vertical slice is approved.
+The Architecture Decision Gate resolved the prior product and platform questions. No unresolved question blocks V1 implementation. The items below are implementation clarifications to be captured in executable contracts or ADRs during Slice 0, not new product decisions.
 
-## Product and policy
+## Resolved by the V1 decision gate
 
-1. Is React Native/Expo the final mobile choice, or should the DOCX Flutter recommendation prevail?
-2. What registration method is required: password, phone OTP, email OTP, social login, or a combination?
-3. Which browsing screens are public, and where is authentication first required?
-4. Can one user hold multiple partner roles or belong to an organization?
-5. What are the exact pandit reschedule/cancellation windows, fees, refund rules, and no-show policy?
-6. What time zone governs availability and booking display for each pandit/location?
-7. What is the exact slot granularity, service duration, buffer, blackout, and recurring availability model?
-8. Are convenience fees, taxes, discounts, tips, and rounding rules fixed or configurable?
-9. Do restaurant and samagri orders share the same cart/order flow, or are carts merchant-scoped?
-10. What are inventory reservation, out-of-stock, substitution, tax, delivery fee, and cancellation rules?
-11. Which restaurant detail/menu/checkout screens are required beyond the listed restaurant listing?
-12. Is restaurant ordering in v1 or only discovery? Which order states are customer-visible?
-13. How are delivery requests priced, covered, assigned, cancelled, and paid?
-14. Is live delivery tracking polling, push, WebSocket, or a later phase? What location accuracy/retention is allowed?
-15. Which notification channels are required: push, SMS, email, in-app? What preferences and opt-outs apply?
-16. Can customers submit reviews? One per booking/order? What moderation, edit, and deletion rules apply?
-17. What does Favorites support and which entity types can be favorited?
-18. What are Help & Support case creation, SLA, escalation, and contact-channel requirements?
-19. Are payment methods merely provider-managed, or must Dharma list/remove methods?
-20. Are account deletion, data export, privacy consent, and age/region restrictions required?
+- React Native/TypeScript/Expo/Expo Router/TanStack Query/Zustand/Axios/React Hook Form/Zod.
+- V1 customer scope includes restaurant ordering, payment methods, Favorites, Settings, Help & Support, Reviews, Home, unified Search, delivery, and tracking.
+- Anonymous browsing covers Home, pandits, products, restaurants, and Search; transactional/account capabilities require authentication.
+- Phone OTP is primary authentication; email association is allowed; social login is deferred.
+- Fixed canonical bookable slots, ten-minute reservation hold, shorter Redis lock TTL, MySQL authority, durable idempotency, and transactional outbox.
+- Explicit booking/payment states and reconciliation/refund workflow.
+- Stripe PaymentIntent in INR with signed authoritative webhook, deduplication, reconciliation, and refund/void.
+- Explicit durable infrastructure: IdempotencyRecords, OutboxMessages, ProcessedEvents/Inbox, PaymentWebhookReceipts.
+- One merchant per cart/order, V1 restaurant ordering, finite-inventory concurrency rules.
+- One review per completed eligible booking/order with moderation and aggregate calculation.
+- AWS SNS + SQS at-least-once events with idempotent consumers and canonical `OrderPlaced`.
+- FCM and in-app notifications; optional transactional SMS/email for important events.
+- OpenSearch for discovery only; booking/inventory remain authoritative in MySQL/Booking/Order.
+- V1 delivery coverage/quote/payment/assignment/pickup/on-the-way/delivered/cancelled/ETA with polling.
+- No offline booking/payment/order mutation queue.
+- Partner organization/membership ownership model.
 
-## Technical decisions
+## Implementation clarifications
 
-21. Choose AWS SQS/SNS or RabbitMQ and define ordering/retention/replay semantics.
-22. Choose UUID/ULID/public ID policy and booking/order reference format.
-23. Approve OpenSearch mapping, location search strategy, indexing freshness, and fallback behavior.
-24. Define API pagination limits, rate limits, version compatibility, and client retry policy.
-25. Define Stripe integration mode, supported payment methods/currencies, webhook events, refund/reconciliation cadence.
-26. Approve Redis failure behavior, lock TTL grace period, clock source, and reservation renewal policy.
-27. Define RPO/RTO, SLOs, traffic/scale estimates, and data retention periods.
-28. Define deployment account/network model, WAF/API gateway choice, and environment promotion policy.
-29. Define observability vendor/export, trace sampling, dashboard owners, and alert thresholds.
-30. Confirm whether partner/admin clients have separate API scopes and DTOs from customer APIs.
+1. Set concrete OTP expiry, resend, verification-attempt, and session-duration configuration values within the approved security policy.
+2. Set concrete Redis lock TTL, clock-skew margin, fixed-slot duration/buffer configuration, and reservation expiry scheduler interval.
+3. Define OpenSearch mappings, ranking weights, geospatial precision, freshness targets, and rebuild runbooks.
+4. Define SNS topic/SQS queue names, FIFO versus standard queue assignment per event stream, retention, visibility timeout, retry count, and DLQ redrive permissions.
+5. Define numeric SLOs, RPO/RTO, traffic profiles, capacity thresholds, and alert thresholds before production.
+6. Define deployment account/network/WAF configuration and controlled migration execution in the release runbook.
+7. Define final localized notification templates and support content after product copy review.
 
-## Human approval gate
-
-No implementation should silently decide these items. Each answer should be recorded in an ADR or requirements update and reflected in the affected API, state machine, UX contract, and test plan.
+These clarifications cannot change the approved V1 behavior without reopening the Architecture Decision Gate.

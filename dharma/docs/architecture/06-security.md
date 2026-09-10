@@ -6,17 +6,17 @@ The mobile app, internet clients, partner clients, web admin, AWS edge, API, dat
 
 ## Identity and sessions
 
-Use short-lived JWT access tokens and rotating refresh tokens. Store only refresh/session material in platform secure storage (Expo SecureStore or approved equivalent), never in ordinary preferences or logs. Hash refresh tokens at rest, revoke on logout/security events, detect reuse, and support device/session visibility if approved. Password/OTP policy and identity verification channel are open questions.
+Use phone OTP as the primary registration/login method. OTPs are single-use, expire after a short configured lifetime, enforce resend and verification attempt limits, and are rate-limited by phone, device, and IP. Email may be associated with an account; social login is deferred. Use short-lived JWT access tokens and rotating refresh tokens. Store only refresh/session material in platform secure storage (Expo SecureStore or approved equivalent), never in ordinary preferences or logs. Hash refresh tokens at rest, revoke on logout/security events, detect reuse, and expire sessions server-side.
 
 Access-token claims identify subject and coarse roles. Resource ownership is checked server-side against the database. Do not trust role values supplied by the client. Use policy-based authorization for customer ownership, partner assignment/organization, and admin capabilities.
 
 ## Authorization matrix
 
 - Customer: own profile, addresses, favorites, carts, bookings, orders, payments, delivery requests, notifications.
-- Pandit: own approved profile/services/availability and assigned bookings in future Partner App.
-- Pooja shop: own catalog and orders in future Partner App.
-- Restaurant: own restaurant/menu and orders in future Partner App.
-- Delivery partner: assigned delivery requests and permitted status/location operations.
+- Pandit: own approved profile/services/availability and assigned bookings through a future Partner App, constrained by organization membership.
+- Pooja shop: own catalog and orders through a future Partner App, constrained by organization membership.
+- Restaurant: own restaurant/menu and orders through a future Partner App, constrained by organization membership.
+- Delivery partner: assigned delivery requests and permitted status/location operations, constrained by partner membership/assignment.
 - Admin: explicit least-privilege policies for support/operations/configuration; sensitive actions audited.
 
 ## Input and API security
@@ -42,6 +42,10 @@ Audit login/security events, role changes, administrative actions, booking/payme
 ## Mobile security
 
 Use secure storage, certificate/transport defaults, no secrets in the bundle, release build hardening, safe screenshots/clipboard behavior for sensitive views, and redacted analytics. Handle logout and account deletion by clearing customer-scoped cache. Treat push payloads as untrusted and avoid sensitive data in notification bodies.
+
+## V1 authentication recovery
+
+Account recovery uses phone OTP re-verification. Refresh-token reuse revokes the affected session family and requires a fresh OTP login. Logout revokes the current refresh session and clears mobile secure/session state. OTP provider failures return a safe retryable ProblemDetails response without revealing account existence.
 
 ## Security testing
 

@@ -20,7 +20,7 @@ The requirements explicitly document 13 customer screens. The shared state contr
 - API/data: profile summary, selected address/location, recommendations, upcoming booking, unread count.
 - Actions/validation: Select location/address; search requires non-empty query when submitted; service shortcuts.
 - States: Skeleton sections; empty recommendations/upcoming booking; retry per section or whole page; success is navigation/action feedback.
-- Auth: Authenticated for personalized data; public access policy requires approval. Authorization: customer owns returned data.
+- Auth: Anonymous browsing is allowed; authenticated requests add personalized recommendations, upcoming booking, and unread notifications. Authorization: customer owns private returned data; published discovery data is public.
 
 ## 3. Pandit Listing
 
@@ -30,7 +30,7 @@ The requirements explicitly document 13 customer screens. The shared state contr
 - API/data: paginated `/pandits`, filters, location, search query, facets.
 - Actions/validation: Search/filter/sort; date/location filters validated by API schema.
 - States: Skeleton list; no results with clear filter/reset action; retry; pagination loading.
-- Auth: Public or authenticated browsing requires approval. Authorization: customer-readable published records.
+- Auth: Anonymous browsing allowed. Authorization: customer-readable published records.
 
 ## 4. Pandit Details
 
@@ -40,7 +40,7 @@ The requirements explicitly document 13 customer screens. The shared state contr
 - API/data: pandit profile, verification, services, rating, reviews summary.
 - Actions/validation: Select service; only active/eligible services may proceed.
 - States: Skeleton; unavailable/unpublished pandit state; retry; success is booking navigation.
-- Auth: Public or authenticated per policy. Authorization: published data only.
+- Auth: Anonymous browsing allowed. Authorization: published data only.
 
 ## 5. Booking Details
 
@@ -56,7 +56,7 @@ The requirements explicitly document 13 customer screens. The shared state contr
 
 - Purpose: Show ten-minute slot hold and collect payment.
 - Entry: Successful reservation from booking details.
-- Exit/navigation: Pay -> provider UI/result; expiry/failure -> retry or booking restart; back policy requires approval.
+- Exit/navigation: Pay -> provider UI/result; expiry/failure -> retry or booking restart; back preserves the server-side reservation state and never implies cancellation or success.
 - API/data: reservation expiry, booking draft, payment intent, totals.
 - Actions/validation: Pay only before expiry; payment-provider validation; no client final confirmation.
 - States: Countdown; payment unavailable/expired; retry safe with idempotency; success waits for server-confirmed status.

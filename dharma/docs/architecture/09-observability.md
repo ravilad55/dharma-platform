@@ -22,11 +22,11 @@ Request count, latency p50/p95/p99, error rate by route/status, active requests,
 
 ### Booking/payment
 
-Availability query latency, reservation attempts, lock contention/failure, reservation expiry, duplicate commands, booking confirmation rate, payment intent creation, webhook delay, payment success/failure/pending, reconciliation backlog, and late provider events.
+Availability query latency, reservation attempts, fixed-slot claim conflicts, lock contention/failure, reservation expiry, duplicate commands, booking confirmation rate, payment intent creation, OTP request/verify/rate-limit outcomes, webhook delay, payment success/failure/pending, reconciliation backlog, refund/void outcomes, and late provider events.
 
 ### Orders/delivery/notifications
 
-Order creation/payment conversion, status transition latency, assignment time, delivery ETA freshness, location update delay, FCM success/failure, notification queue age, and DLQ count.
+Order placement/payment conversion, inventory reservation conflicts, status transition latency, delivery quote/assignment time, delivery ETA freshness, polling request latency, location update delay, FCM/SMS/email success/failure, notification deduplication, queue age, and DLQ count.
 
 ### Data/search/cache
 

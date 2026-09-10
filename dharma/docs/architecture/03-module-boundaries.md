@@ -11,37 +11,37 @@ Each module owns its entities, commands, queries, validation, policies, persiste
 - Commands: RegisterCustomer, Login, RefreshToken, Logout, ChangeProfile, RevokeSessions.
 - Queries: CurrentUser, UserRoles.
 - APIs: `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/users/profile`.
-- Dependencies: email/phone verification provider if approved, token/key management.
+- Dependencies: phone OTP provider, optional email association, token/key management.
 - Events: UserRegistered, UserRoleChanged, UserDeactivated.
 
 ## Customer
 
 - Responsibility: customer preferences, addresses, favorites, customer-facing profile data.
-- Data: CustomerProfile, Address, Favorite.
+- Data: CustomerProfile, Address, Favorite, CustomerSetting, SupportCase, SupportMessage.
 - Commands: Create/Update/DeleteAddress, SetDefaultAddress, Add/RemoveFavorite, UpdatePreferences.
 - Queries: Addresses, Favorites, CustomerSummary.
-- APIs: `/users/addresses`, `/users/favorites`, profile preferences.
-- Dependencies: Identity; Maps/geocoding for validation if approved.
+- APIs: `/users/addresses`, `/users/favorites`, `/users/settings`, `/support/cases`, `/home`, `/search`.
+- Dependencies: Identity; Maps/geocoding and place lookup; Home aggregation reads published contracts from discovery modules without owning their tables.
 - Events: AddressChanged, FavoriteChanged.
 
 ## Pandit
 
 - Responsibility: verified pandit profiles, services, availability, ratings/reviews read model, future partner operations.
-- Data: Pandit, PanditService, AvailabilityRule, AvailabilityException, Review read ownership as defined below.
-- Commands: future partner Create/UpdateProfile, MaintainService, MaintainAvailability; customer-facing review command if approved.
+- Data: Pandit, PanditService, FixedBookableSlot, AvailabilityRule, AvailabilityException, Review, ReviewModeration.
+- Commands: future partner Create/UpdateProfile, MaintainService, MaintainAvailability; customer CreateReview, EditReview, DeleteReview, ModerateReview.
 - Queries: list/search, detail, availability, reviews.
-- APIs: `GET /pandits`, `/pandits/{id}`, `/pandits/{id}/availability`, reviews.
-- Dependencies: Identity partner role, Booking read contract, OpenSearch.
+- APIs: `GET /pandits`, `/pandits/{id}`, `/pandits/{id}/availability`, reviews CRUD subject to completed-booking eligibility.
+- Dependencies: Identity partner membership, Booking completed-eligibility contract, OpenSearch.
 - Events: PanditVerified, AvailabilityChanged, ReviewPublished.
 
 ## PoojaSamagri
 
 - Responsibility: shops, product categories, products, inventory/availability projection.
-- Data: PoojaShop, ProductCategory, Product, ProductImage, inventory fields.
+- Data: PoojaShop, ProductCategory, Product, ProductImage, InventoryItem, InventoryReservation.
 - Commands: future partner MaintainProduct, MaintainCategory, UpdateAvailability.
 - Queries: products, categories, product detail, search.
 - APIs: `/products`, `/product-categories`, shop/product detail.
-- Dependencies: Identity, Order read contract, OpenSearch, S3.
+- Dependencies: Identity partner membership, Order checkout contract, OpenSearch, S3.
 - Events: ProductChanged, ProductAvailabilityChanged.
 
 ## Restaurant
@@ -51,59 +51,67 @@ Each module owns its entities, commands, queries, validation, policies, persiste
 - Commands: future partner MaintainRestaurant, MaintainMenu, UpdateAvailability.
 - Queries: restaurants, restaurant detail/menu, search.
 - APIs: `/restaurants`, `/restaurants/{id}`, menu endpoints.
-- Dependencies: Identity, Order, OpenSearch, S3.
+- Dependencies: Identity partner membership, Order checkout contract, OpenSearch, S3.
 - Events: RestaurantChanged, MenuItemChanged.
 
 ## Delivery
 
 - Responsibility: delivery request lifecycle, assignment, location snapshots, ETA/status.
 - Data: DeliveryRequest, DeliveryAssignment, DeliveryLocation, status history.
-- Commands: CreateDeliveryRequest, CancelDeliveryRequest; future partner Accept, Pickup, MarkInTransit, Complete.
+- Commands: CreateDeliveryRequest, QuoteDelivery, CancelDeliveryRequest; future partner Accept, Pickup, MarkInTransit, Complete.
 - Queries: delivery detail, tracking.
 - APIs: `/delivery-requests`, `/delivery-requests/{id}`, `/tracking`.
-- Dependencies: Customer addresses, Maps, Identity partner role, Notification, Order optional reference.
+- Dependencies: Customer address/place contracts, Maps, Identity partner membership, Notification events, Order optional reference.
 - Events: DeliveryRequested, PartnerAssigned, DeliveryStatusChanged, DeliveryCompleted.
 
 ## Booking
 
 - Responsibility: service selection, slot availability, ten-minute reservation, booking status, reschedule/cancel policy.
-- Data: Booking, BookingSlotReservation, booking status history.
-- Commands: CreateReservation, ConfirmAfterPayment, Reschedule, Cancel, ExpireReservation.
+- Data: Booking, FixedBookableSlot, BookingSlotReservation, booking status history, BookingReconciliation.
+- Commands: CreateReservation, ConfirmAfterPayment, Reschedule, Cancel, ExpireReservation, MarkFinalizationFailed, ReconcileBooking.
 - Queries: booking detail, customer bookings, availability.
 - APIs: `/bookings`, `/bookings/{id}`, `/bookings/{id}/reschedule`, cancel.
-- Dependencies: Pandit availability, Customer address, Payment verification, Redis, Notification.
-- Events: BookingReserved, BookingConfirmed, BookingExpired, BookingCancelled, BookingRescheduled.
+- Dependencies: Pandit fixed slots, Customer address snapshot contract, Payment verification port, Redis, transactional outbox. Notification is event-driven only.
+- Events: BookingReserved, BookingConfirmed, BookingExpired, BookingCancelled, BookingRescheduled, BookingFinalizationFailed, BookingAwaitingReconciliation, BookingRefundPending, BookingRefunded.
 
 ## Order
 
-- Responsibility: customer cart/order aggregate, item snapshots, order status, order history. Separate order type identifies samagri vs restaurant.
-- Data: Order, OrderItem, Cart or cart projection, order status history.
-- Commands: Add/UpdateCartItem, ClearCart, CreateOrder, CancelOrder where policy allows, UpdateFulfilmentStatus future partner.
+- Responsibility: one-merchant cart/checkout, item snapshots, inventory reservation coordination, order status, order history. Separate order type identifies samagri vs restaurant.
+- Data: Order, OrderItem, Cart, CartItem, InventoryReservation reference, order status history.
+- Commands: Add/UpdateCartItem, ClearCart, Checkout, CreateOrder, CancelOrder where policy allows, UpdateFulfilmentStatus future partner.
 - Queries: cart, order detail, customer order list.
 - APIs: `/carts`, `/orders`, `/orders/{id}`.
 - Dependencies: PoojaSamagri/Restaurant catalog contracts, Customer address, Payment, Delivery, Notification.
-- Events: OrderCreated, OrderPaid, OrderAccepted, OrderReady, OrderOutForDelivery, OrderDelivered, OrderCancelled.
+- Events: OrderPlaced, OrderPaid, OrderAccepted, OrderReady, OrderOutForDelivery, OrderDelivered, OrderCancelled.
 
 ## Payment
 
-- Responsibility: Stripe payment intents, provider references, webhook verification, payment status, refunds if approved.
-- Data: Payment, PaymentAttempt, ProviderWebhookReceipt, refund references.
-- Commands: CreatePaymentIntent, HandleProviderWebhook, VerifyPayment, Refund.
+- Responsibility: Stripe INR PaymentIntents, provider references, webhook verification, payment status, void/refund workflow, reconciliation.
+- Data: Payment, PaymentAttempt, PaymentWebhookReceipt, Refund, PaymentReconciliation.
+- Commands: CreatePaymentIntent, HandleProviderWebhook, VerifyPayment, VoidOrRefund, ReconcilePayment.
 - Queries: payment status for authorized owner/admin.
-- APIs: `/payments`, `/payments/{id}`, `/payments/webhooks/stripe`.
+- APIs: `/payments`, `/payments/{id}`, `/payments/{id}/reconciliation`, `/payments/{id}/refund`, `/payments/webhooks/stripe`, `/payment-methods`.
 - Dependencies: Stripe, Booking/Order contracts, Identity, outbox.
 - Events: PaymentCreated, PaymentSucceeded, PaymentFailed, PaymentExpired, RefundCompleted.
 
 ## Notification
 
-- Responsibility: notification preferences, in-app notification records, push token registration, delivery attempts.
-- Data: Notification, DeviceToken, NotificationPreference, DeliveryAttempt.
+- Responsibility: notification templates, preferences, in-app records, push token registration, delivery attempts, optional important-event SMS/email.
+- Data: NotificationTemplate, Notification, DeviceToken, NotificationPreference, DeliveryAttempt.
 - Commands: RegisterDevice, MarkRead, HandleBusinessEvent.
 - Queries: notification list/unread count.
 - APIs: `/notifications`, `/notifications/{id}/read`, `/devices`.
-- Dependencies: FCM, messaging/outbox, Identity.
+- Dependencies: FCM, optional transactional SMS/email provider, SNS/SQS/outbox, Identity.
 - Events: NotificationQueued, NotificationSent, NotificationFailed.
+
+## Partner ownership model
+
+Identity owns `PartnerOrganizations`, `PartnerMemberships`, membership role, approval/status, and resource ownership references. Pandit, PoojaSamagri, Restaurant, and Delivery own their resource records but reference an approved organization and enforce membership/assignment policies. A user may hold multiple partner roles through separate memberships. Admin policies are explicit and audited; no Partner App is built in V1.
 
 ## Review ownership
 
-The requirements require Reviews in the database and display ratings/reviews, but do not define review submission rules. Until approved, Pandit owns the read model and Review entity boundary; a review capability may become a separate module only if moderation and cross-domain review scope requires it. This is an open decision.
+Pandit owns review records and aggregate projections for pandit reviews. Restaurant owns restaurant review records if restaurant reviews are enabled by the customer scope. A customer may create one review per completed eligible booking/order, subject to moderation. Review writes are server-authorized and event updates recalculate aggregates.
+
+## Dependency direction
+
+Identity is foundational. Catalog modules expose published read contracts to Customer/Home/Search and checkout validation. Booking calls a Payment verification port; Payment publishes provider outcomes and never references Booking implementation. Order calls Payment through the same port. Notification, search indexing, cache invalidation, and analytics consume SNS/SQS events only. Delivery may reference an Order ID through an explicit optional FK/contract, not an Order table read.

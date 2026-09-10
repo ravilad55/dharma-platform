@@ -10,9 +10,9 @@ Use environment and version prefixes, for example `dharma:{env}:v1:{purpose}:{id
 
 ## Booking lock and reservation
 
-Lock key: `booking:slot:{panditId}:{serviceId}:{slotStartUtc}:{slotEndUtc}`. Acquire with an atomic `SET key token NX PX`, where TTL is bounded around the ten-minute reservation plus clock-skew/grace policy. The value is a cryptographically random ownership token. Release only through an atomic compare-and-delete operation; never delete another holder's lock.
+Lock key: `booking:slot:{fixedSlotId}`. Acquire with an atomic `SET key token NX PX`, where TTL is shorter than the ten-minute reservation hold and includes only a small approved clock-skew margin. The value is a cryptographically random ownership token. Release only through an atomic compare-and-delete operation; never delete another holder's lock.
 
-The lock prevents concurrent admission but does not replace database constraints. The reservation record in MySQL carries `expires_at` and status. A customer may renew only through an approved server operation; there is no client-controlled TTL extension. A background expiry process and request-time checks transition abandoned holds. If Redis is unavailable, fail closed for new booking reservations rather than risk double booking.
+The lock prevents concurrent admission but does not replace database constraints. The reservation record in MySQL carries `expires_at` and status. A customer cannot renew the ten-minute hold; there is no client-controlled TTL extension. A background expiry process and request-time checks transition abandoned holds. If Redis is unavailable, fail closed for new booking reservations rather than risk double booking. A Redis failover never grants a new lock until the managed service reports a healthy primary; the MySQL fixed-slot conditional claim remains authoritative.
 
 Payment timeout/failed payment releases the reservation after the server marks the attempt failed or expired. A late provider success is reconciled by Payment and Booking using expected-state rules; it must not create a duplicate booking.
 
@@ -28,7 +28,7 @@ Durable idempotency records belong in MySQL so results survive Redis loss. Redis
 
 ## Invalidation and operations
 
-Publish invalidation after successful commits through the outbox. Treat cache misses and evictions as normal. Monitor memory, evictions, hit ratio, command latency, replication/failover, lock contention, and expired reservations. Alert on lock acquisition failures, unusual hold age, and Redis errors.
+Publish invalidation after successful commits through the outbox. Each projection declares an owner, key family, TTL, freshness target, and rebuild path. Treat cache misses and evictions as normal. Monitor memory, evictions, hit ratio, command latency, replication/failover, lock contention, and expired reservations. Alert on lock acquisition failures, unusual hold age, and Redis errors.
 
 ## Failure rules
 

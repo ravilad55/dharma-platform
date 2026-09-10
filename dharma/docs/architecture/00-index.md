@@ -15,5 +15,10 @@ This directory is the implementation-ready architecture set for the Dharma Custo
 - [11 Architecture Risks](11-architecture-risks.md)
 - [12 Open Questions](12-open-questions.md)
 - [13 Implementation Plan](13-implementation-plan.md)
+- [14 Requirement Traceability](14-requirement-traceability.md)
+- [15 Architecture Review](15-architecture-review.md)
+- [16 Architecture Decisions Required](16-architecture-decisions-required.md)
+- [17 Approved V1 Decisions](17-approved-v1-decisions.md)
+- [18 Final Architecture Readiness](18-final-architecture-readiness.md)
 
 The index is an aid to review; it does not introduce additional product scope.

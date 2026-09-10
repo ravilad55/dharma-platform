@@ -13,14 +13,14 @@ CloudFront/S3 for approved static/media assets
        |       |       |
      RDS   ElastiCache  OpenSearch
        |
-    Outbox -> SQS/SNS or approved queue -> workers/handlers
+    Outbox -> SNS -> SQS subscriptions -> workers/handlers
 
 External: Stripe, FCM, Google Maps
 Observability: CloudWatch/OpenTelemetry
 Secrets: AWS Secrets Manager + IAM task roles
 ```
 
-The API and background dispatcher may run in separate ECS task definitions while remaining one modular-monolith codebase/deployment boundary. Scaling them separately is an operational decision, not a microservice split.
+The API, outbox dispatcher, and reconciliation/expiry workers may run in separate ECS task definitions while remaining one modular-monolith codebase/deployment boundary. Scaling them separately is an operational decision, not a microservice split. Active delivery tracking uses API polling in V1; the tracking DTO and polling endpoint remain transport-neutral for future WebSocket/SignalR support.
 
 ## Data and storage
 

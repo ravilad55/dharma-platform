@@ -55,7 +55,7 @@ The names above are route recommendations, not new product requirements. Missing
 
 ## Guards and deep links
 
-- Public routes are available without a session.
+- Anonymous users may browse Home, pandit listings/details, products, restaurants, and Search. Booking, ordering, payment, favorites, reviews, profile, addresses, and payment methods require authentication.
 - Customer routes require a valid access token; expired access tokens use refresh once, then redirect to login while preserving an allowed return path.
 - A deep link to a customer-owned resource performs an authorized fetch; it must not infer access from route parameters.
 - Payment and booking confirmation deep links require server state checks and show pending/expired/failed states.
@@ -71,4 +71,4 @@ Pass opaque IDs and small display context only; fetch authoritative detail data 
 
 ## Accessibility and failure behavior
 
-Every route has a screen title, semantic focus order, accessible tab labels, and an error boundary. Offline or stale screens show last known safe data with a retry action; mutation buttons are disabled while the command is pending and remain idempotent server-side.
+Every route has a screen title, semantic focus order, accessible tab labels, and an error boundary. Offline or stale screens show last known safe read data with a retry action. Booking, payment, and order mutations are never queued offline; forms preserve safe user input and show a clear retry-when-online action. Mutation buttons are disabled while the command is pending and remain idempotent server-side.

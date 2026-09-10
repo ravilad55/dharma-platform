@@ -1,6 +1,6 @@
 # 13 Implementation Plan
 
-The sequence below is vertical-slice oriented. It assumes the open questions are resolved before each dependent slice. v1 remains one modular monolith.
+The sequence below is vertical-slice oriented. The V1 decisions are approved and recorded in [17-approved-v1-decisions.md](17-approved-v1-decisions.md). Remaining clarifications are implementation/configuration work within the slices. V1 remains one modular monolith.
 
 ## Slice 0: Architecture and delivery foundation
 
@@ -14,12 +14,12 @@ The sequence below is vertical-slice oriented. It assumes the open questions are
 
 ## Slice 1: Identity and customer foundation
 
-- Backend: Identity and Customer modules; registration/login/refresh/logout/profile/addresses; policies and audit.
+- Backend: Identity and Customer modules; phone OTP request/verify, refresh/logout/profile/addresses/settings/favorites/support; policies and audit.
 - Database: users, roles, sessions, profiles, addresses, device tokens.
 - API: auth/profile/address contracts and ProblemDetails.
 - React Native: onboarding, login/register/recovery placeholders only after UX approval, profile/address flows, auth guards.
 - Tests: token rotation/revocation, ownership, validation, rate limits, mobile auth persistence and logout.
-- Dependencies: identity verification policy, secure storage.
+- Dependencies: approved phone OTP provider, secure storage.
 - Done: customer can authenticate and manage an address safely across app relaunch.
 
 ## Slice 2: Pandit discovery
@@ -39,7 +39,7 @@ The sequence below is vertical-slice oriented. It assumes the open questions are
 - API: create reservation, booking list/detail, cancellation/reschedule policy endpoints.
 - React Native: booking details form, address/service/date/time selection, reservation countdown.
 - Tests: concurrent attempts, duplicate requests, Redis failure, expiry, cancellation/reschedule authorization, E2E reservation.
-- Dependencies: slot semantics, fee policy.
+- Dependencies: fixed-slot configuration and approved fee/tax/currency rules.
 - Done: one slot cannot be committed twice and every hold has observable expiry behavior.
 
 ## Slice 4: Stripe payment and booking confirmation
@@ -49,7 +49,7 @@ The sequence below is vertical-slice oriented. It assumes the open questions are
 - API: payment intent/status/webhook; pending/failed/success states.
 - React Native: provider payment UI integration, payment states, confirmation screen; never client-authoritative.
 - Tests: provider success/failure/timeout, duplicate/out-of-order webhook, late success, payment retry, end-to-end confirmed booking.
-- Dependencies: Stripe account/payment methods/refund policy.
+- Dependencies: Stripe INR PaymentIntent configuration and reconciliation/refund workflow.
 - Done: only server-verified payment confirms booking; failures release or reconcile holds predictably.
 
 ## Slice 5: Booking history and notifications
@@ -64,12 +64,12 @@ The sequence below is vertical-slice oriented. It assumes the open questions are
 
 ## Slice 6: Pooja Samagri catalog and order
 
-- Backend: PoojaSamagri and Order catalog/cart/order/payment integration.
+- Backend: PoojaSamagri and Order catalog/cart/checkout/inventory/order/payment integration for both samagri and restaurants.
 - Database: shops, categories, products/images, carts/items, orders/items/status history.
 - API: catalog, cart, order creation/detail/list/cancel.
 - React Native: samagri listing, cart, checkout/order history/detail screens.
 - Tests: price snapshot, stock/availability policy, duplicate order, payment failure, order authorization, E2E order.
-- Dependencies: merchant/cart/tax/inventory decisions.
+- Dependencies: approved one-merchant cart, INR commercial snapshots, finite-inventory reservation rules.
 - Done: customer can place and view a supported samagri order with immutable line-item facts.
 
 ## Slice 7: Restaurant discovery and order
@@ -79,7 +79,7 @@ The sequence below is vertical-slice oriented. It assumes the open questions are
 - API: restaurant listing/detail/menu and order paths.
 - React Native: restaurant listing/detail/menu/order screens.
 - Tests: pure-veg publication, menu availability, merchant isolation, order/payment transitions.
-- Dependencies: whether restaurant ordering is v1 and restaurant operational workflow.
+- Dependencies: partner fulfilment workflow remains future-client work; customer restaurant order states are approved.
 - Done: approved restaurant journey works without coupling to samagri catalog ownership.
 
 ## Slice 8: Delivery request and tracking
@@ -89,7 +89,7 @@ The sequence below is vertical-slice oriented. It assumes the open questions are
 - API: create/detail/tracking/cancel.
 - React Native: request form, map/tracking screen, stale/no-location states.
 - Tests: ownership, assignment transitions, location privacy/retention, provider outage, tracking freshness.
-- Dependencies: pricing, dispatch, realtime choice, partner workflow.
+- Dependencies: approved coverage/quote/payment/assignment policy and V1 polling; partner fulfilment UI remains future scope.
 - Done: customer sees a truthful delivery state and last-update time; no fabricated ETA/location.
 
 ## Slice 9: Security, performance, and production readiness

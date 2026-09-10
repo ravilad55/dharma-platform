@@ -28,7 +28,7 @@ The customer app information architecture contains Home, Bookings, Orders, and P
 | Delivery Partner | Future Partner app | Accept and fulfil delivery requests |
 | Admin | Future Admin Web Portal | Users, partners, services, orders, bookings, payments, complaints, reports, configuration |
 
-A partner organization/operator model is needed for future roles, but the requirements do not define whether a person can hold multiple partner roles. Record this as an open question.
+A partner organization/operator model is defined for future roles. A person may hold multiple partner roles through separate organization memberships; partner and admin UIs remain future scope.
 
 ## Customer capabilities
 
@@ -70,11 +70,11 @@ Customer supplies pickup, drop, and package information. Delivery creates a requ
 
 ## Technology alignment
 
-The DOCX recommends Flutter, Riverpod, GoRouter, and Dio. The approved project direction is React Native, TypeScript, Expo, Expo Router, TanStack Query, Zustand, Axios, React Hook Form, and Zod. The latter is used in this architecture; no user-facing product requirement is changed. This decision requires human approval if the DOCX recommendation is still authoritative.
+The DOCX recommends Flutter, Riverpod, GoRouter, and Dio. The approved V1 project direction replaces that recommendation with React Native, TypeScript, Expo, Expo Router, TanStack Query, Zustand, Axios, React Hook Form, and Zod. No user-facing product requirement is changed.
 
 ## Product boundaries and deferred scope
 
-The customer app is first. Partner and Admin interfaces are future consumers, but their required capabilities determine ownership and authorization boundaries now. Partner operational workflows, admin workflows, restaurant menu detail, product detail, cart checkout detail, review submission, favorites behavior, support case lifecycle, payment-method management, SMS/email provider choice, and delivery pricing are not sufficiently specified and are open questions.
+The customer app is first. V1 includes authentication, all named customer discovery/booking/order/delivery/profile flows, payment methods, favorites, notifications, settings, Help & Support, and reviews. Partner and Admin interfaces remain future applications, but partner organization/membership ownership and admin authorization boundaries are defined now. Social login is deferred. Transactional SMS/email is optional for important events; FCM and in-app notifications are required.
 
 ## Acceptance baseline
 
