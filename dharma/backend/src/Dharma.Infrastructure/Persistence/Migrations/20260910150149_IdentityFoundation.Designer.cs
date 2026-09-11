@@ -4,6 +4,7 @@ using Dharma.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dharma.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DharmaDbContext))]
-    partial class DharmaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260910150149_IdentityFoundation")]
+    partial class IdentityFoundation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -142,10 +145,6 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -166,13 +165,6 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("varchar(32)");
 
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PhoneLookupHash")
@@ -184,126 +176,12 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                     b.ToTable("users", (string)null);
                 });
 
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.IdentityCustomerProfileRecord", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Preferences")
-                        .HasMaxLength(4000)
-                        .HasColumnType("varchar(4000)");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("customer_profiles", (string)null);
-                });
-
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.IdentityRoleRecord", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("roles", (string)null);
-                });
-
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.IdentityUserRoleRecord", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTimeOffset>("AssignedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("user_roles", (string)null);
-                });
-
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.AuthAuditEventRecord", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("ChallengeId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("CorrelationId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("EventType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("Outcome")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<Guid?>("SessionId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("SafeMetadata")
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTimeOffset>("OccurredAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId", "OccurredAt");
-
-                    b.HasIndex("EventType", "OccurredAt");
-
-                    b.HasIndex("CorrelationId");
-
-                    b.ToTable("auth_audit_events", (string)null);
-                });
-
             modelBuilder.Entity("Dharma.Infrastructure.Persistence.InboxRecord", b =>
                 {
                     b.Property<Guid>("EventId")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("Consumer")
-                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
@@ -362,30 +240,6 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.IdentityCustomerProfileRecord", b =>
-                {
-                    b.HasOne("Dharma.Infrastructure.Persistence.IdentityUserRecord", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.IdentityUserRoleRecord", b =>
-                {
-                    b.HasOne("Dharma.Infrastructure.Persistence.IdentityRoleRecord", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Dharma.Infrastructure.Persistence.IdentityUserRecord", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

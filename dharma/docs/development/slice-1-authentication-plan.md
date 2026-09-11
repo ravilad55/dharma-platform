@@ -1,6 +1,6 @@
 # Slice 1 Authentication Implementation Plan
 
-Status: architecture-ready plan; no authentication code implemented
+Status: implemented and validated; see [slice-1-validation.md](slice-1-validation.md) for test results
 
 ## Scope and non-scope
 

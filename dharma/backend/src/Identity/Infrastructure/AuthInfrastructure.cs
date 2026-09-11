@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Dharma.SharedKernel.Abstractions;
 
 namespace Dharma.Identity.Infrastructure;
 
@@ -22,12 +23,39 @@ public sealed class DevelopmentOtpProvider(IHostEnvironment environment) : IOtpP
     }
 }
 
-public sealed class JwtTokenService(IOptions<AuthPolicyOptions> options, IHostEnvironment environment) : ITokenService
+public sealed class NoOpDistributedLock : IDistributedLock
 {
-    private readonly AuthPolicyOptions policy = options.Value;
-    private readonly byte[] key = Encoding.UTF8.GetBytes(environment.IsProduction()
-        ? throw new InvalidOperationException("JWT signing key configuration is required in production.")
-        : "development-only-ephemeral-signing-key-change-me");
+    public Task<IAsyncDisposable?> TryAcquireAsync(string key, TimeSpan expiry, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IAsyncDisposable?>(new Lease());
+
+    private sealed class Lease : IAsyncDisposable
+    {
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+}
+
+public sealed class NoOpAuditPublisher : IAuditPublisher
+{
+    public Task PublishAsync(AuthAuditEvent auditEvent, CancellationToken cancellationToken = default) => Task.CompletedTask;
+}
+
+public sealed class NoOpTransactionBoundary : ITransactionBoundary
+{
+    public Task ExecuteAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default) => action(cancellationToken);
+}
+
+public sealed class JwtTokenService : ITokenService
+{
+    private readonly AuthPolicyOptions policy;
+    private readonly byte[] key;
+
+    public JwtTokenService(IOptions<AuthPolicyOptions> options)
+    {
+        policy = options.Value;
+        key = string.IsNullOrWhiteSpace(policy.SigningKey)
+            ? throw new InvalidOperationException("JWT signing key configuration is required.")
+            : Encoding.UTF8.GetBytes(policy.SigningKey);
+    }
 
     public (string Token, DateTimeOffset ExpiresAt) CreateAccessToken(User user, Session session)
     {
@@ -56,10 +84,17 @@ public static class IdentityDependencyInjection
 {
     public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
-        services.Configure<AuthPolicyOptions>(configuration.GetSection("Authentication"));
+        services.AddOptions<AuthPolicyOptions>()
+            .Bind(configuration.GetSection("Authentication"))
+            .ValidateOnStart();
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<AuthPolicyOptions>>().Value);
         services.AddSingleton<IIdentityStore, InMemoryIdentityStore>();
+        services.AddSingleton<IDistributedLock, NoOpDistributedLock>();
+        services.AddSingleton<IAuthRateLimiter, NoOpAuthRateLimiter>();
         services.AddSingleton<IOtpProvider, DevelopmentOtpProvider>();
         services.AddSingleton<ITokenService, JwtTokenService>();
+        services.AddSingleton<IAuditPublisher, NoOpAuditPublisher>();
+        services.AddSingleton<ITransactionBoundary, NoOpTransactionBoundary>();
         services.AddSingleton<TimeProvider>(TimeProvider.System);
         services.AddScoped<IAuthService, AuthService>();
         return services;

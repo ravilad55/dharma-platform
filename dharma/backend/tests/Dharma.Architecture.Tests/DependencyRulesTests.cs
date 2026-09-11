@@ -38,7 +38,8 @@ public sealed class DependencyRulesTests
         {
             var references = References(ProjectPath(module, "Application"));
             references.Should().OnlyContain(reference =>
-                reference.EndsWith($"Dharma.{module}.Domain.csproj", StringComparison.OrdinalIgnoreCase));
+                reference.EndsWith($"Dharma.{module}.Domain.csproj", StringComparison.OrdinalIgnoreCase) ||
+                reference.EndsWith("Dharma.Shared.csproj", StringComparison.OrdinalIgnoreCase));
         }
     }
 

@@ -66,6 +66,12 @@ public sealed class OtpChallenge
     }
     public void Expire() => State = OtpChallengeState.Expired;
     public void Verify(DateTimeOffset now) { State = OtpChallengeState.Verified; ConsumedAt = now; }
+    public void Restore(OtpChallengeState state, int attemptCount, DateTimeOffset? consumedAt)
+    {
+        State = state;
+        AttemptCount = attemptCount;
+        ConsumedAt = consumedAt;
+    }
 }
 
 public sealed class Session
@@ -80,6 +86,11 @@ public sealed class Session
     public void Touch(DateTimeOffset now) => LastSeenAt = now;
     public void Revoke(bool security = false) => State = security ? SessionState.SecurityRevoked : SessionState.Revoked;
     public void Expire() => State = SessionState.Expired;
+    public void Restore(SessionState state, DateTimeOffset lastSeenAt)
+    {
+        State = state;
+        LastSeenAt = lastSeenAt;
+    }
     public bool IsActive(DateTimeOffset now) => State == SessionState.Active && ExpiresAt > now;
 }
 
@@ -97,4 +108,9 @@ public sealed class RefreshTokenNode
     public bool IsUsable(DateTimeOffset now) => !IsConsumed && !IsRevoked && ExpiresAt > now;
     public void Consume(DateTimeOffset now) => ConsumedAt = now;
     public void Revoke(DateTimeOffset now) => RevokedAt = now;
+    public void Restore(DateTimeOffset? consumedAt, DateTimeOffset? revokedAt)
+    {
+        ConsumedAt = consumedAt;
+        RevokedAt = revokedAt;
+    }
 }

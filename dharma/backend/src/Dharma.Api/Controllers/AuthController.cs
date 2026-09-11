@@ -5,12 +5,13 @@ using Dharma.Identity.Application;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace Dharma.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/auth")]
-public sealed class AuthController(IAuthService authService, IOptions<AuthPolicyOptions> policy) : ControllerBase
+public sealed class AuthController(IAuthService authService) : ControllerBase
 {
     [AllowAnonymous]
     [HttpPost("request-otp")]
@@ -68,13 +69,24 @@ public sealed class AuthController(IAuthService authService, IOptions<AuthPolicy
 
     private bool TryGetIdentity(out Guid userId, out Guid sessionId)
     {
+        userId = Guid.Empty;
+        sessionId = Guid.Empty;
         return Guid.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier), out userId)
             && Guid.TryParse(User.FindFirstValue("sid"), out sessionId);
     }
 
     private ObjectResult Problem(AuthException exception)
     {
-        if (exception.RetryAfter.HasValue) Response.Headers.RetryAfter = ((int)Math.Ceiling(exception.RetryAfter.Value.TotalSeconds)).ToString();
-        return Problem(statusCode: exception.StatusCode, title: exception.Message, type: $"https://api.dharma.local/problems/{exception.Code}", extensions: new Dictionary<string, object?> { ["code"] = exception.Code, ["traceId"] = HttpContext.TraceIdentifier });
+        if (exception.RetryAfter.HasValue) Response.Headers.RetryAfter = ((int)Math.Ceiling(exception.RetryAfter.Value.TotalSeconds)).ToString(CultureInfo.InvariantCulture);
+        var details = new ProblemDetails
+        {
+            Status = exception.StatusCode,
+            Title = exception.Message,
+            Type = $"https://api.dharma.local/problems/{exception.Code}",
+            Instance = HttpContext.Request.Path
+        };
+        details.Extensions["code"] = exception.Code;
+        details.Extensions["traceId"] = HttpContext.TraceIdentifier;
+        return new ObjectResult(details) { StatusCode = exception.StatusCode, ContentTypes = ["application/problem+json"] };
     }
 }

@@ -1,6 +1,7 @@
 using Dharma.Infrastructure.Messaging;
 using Dharma.Infrastructure.Persistence;
 using Dharma.Infrastructure.Redis;
+using Dharma.Identity.Application;
 using Dharma.Identity.Infrastructure;
 using Dharma.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,8 @@ public static class DependencyInjection
             services.AddScoped<ITransactionBoundary, EfTransactionBoundary>();
             services.AddScoped<IOutboxStore, EfOutboxStore>();
             services.AddScoped<IEventPublisher, JsonEventPublisher>();
+            services.AddScoped<IIdentityStore, EfIdentityStore>();
+            services.AddScoped<IAuditPublisher, EfAuditPublisher>();
         }
 
         var redisConnection = configuration["Redis:ConnectionString"];
@@ -32,6 +35,7 @@ public static class DependencyInjection
             services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnection));
             services.AddSingleton<ICache, RedisCache>();
             services.AddSingleton<IDistributedLock, RedisDistributedLock>();
+            services.AddSingleton<IAuthRateLimiter, RedisAuthRateLimiter>();
         }
 
         return services;

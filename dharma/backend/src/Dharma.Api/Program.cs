@@ -5,8 +5,17 @@ using Dharma.Identity.Application;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (string.IsNullOrWhiteSpace(builder.Configuration["Authentication:SigningKey"]))
+{
+    if (builder.Environment.IsProduction())
+        throw new InvalidOperationException("Authentication:SigningKey must be configured in production.");
+
+    builder.Configuration["Authentication:SigningKey"] = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+}
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ProblemDetailsExceptionHandler>();
@@ -22,7 +31,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidAudience = authPolicy.Audience,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("development-only-ephemeral-signing-key-change-me")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authPolicy.SigningKey)),
         NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub,
         RoleClaimType = System.Security.Claims.ClaimTypes.Role
     };

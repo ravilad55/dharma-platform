@@ -1,4 +1,6 @@
+using System.Security.Cryptography;
 using Dharma.Identity.Domain;
+using Dharma.SharedKernel.Abstractions;
 
 namespace Dharma.Identity.Application;
 
@@ -9,10 +11,15 @@ public sealed record AuthPolicyOptions
     public int MaxOtpAttempts { get; init; } = 5;
     public int MaxOtpRequestsPerWindow { get; init; } = 5;
     public TimeSpan OtpRequestWindow { get; init; } = TimeSpan.FromMinutes(15);
+    public int MaxOtpVerificationsPerWindow { get; init; } = 10;
+    public TimeSpan OtpVerificationWindow { get; init; } = TimeSpan.FromMinutes(15);
     public TimeSpan AccessTokenLifetime { get; init; } = TimeSpan.FromMinutes(10);
     public TimeSpan RefreshTokenLifetime { get; init; } = TimeSpan.FromDays(30);
+    public TimeSpan RefreshTokenIdleLifetime { get; init; } = TimeSpan.FromDays(7);
     public string Issuer { get; init; } = "dharma-api";
     public string Audience { get; init; } = "dharma-customer";
+    public string SigningKey { get; init; } = string.Empty;
+    public int MaxSessionsPerUser { get; init; } = 5;
 }
 
 public sealed record OtpRequest(string PhoneNumber, string DeviceId);
@@ -53,6 +60,13 @@ public interface ITokenService
     string HashRefreshToken(string token);
 }
 
+public sealed record RateLimitDecision(bool Allowed, TimeSpan RetryAfter);
+
+public interface IAuthRateLimiter
+{
+    Task<RateLimitDecision> CheckAsync(string key, int limit, TimeSpan window, CancellationToken cancellationToken = default);
+}
+
 public interface IIdentityStore
 {
     Task<OtpChallenge?> GetChallengeAsync(Guid challengeId, CancellationToken cancellationToken);
@@ -61,10 +75,22 @@ public interface IIdentityStore
     Task<User?> GetUserByPhoneAsync(string phone, CancellationToken cancellationToken);
     Task<User?> GetUserAsync(Guid userId, CancellationToken cancellationToken);
     Task SaveUserAsync(User user, CancellationToken cancellationToken);
+    Task SaveCustomerProfileAsync(CustomerProfile profile, CancellationToken cancellationToken);
+    Task<CustomerProfile?> GetCustomerProfileAsync(Guid userId, CancellationToken cancellationToken);
     Task SaveSessionAsync(Session session, CancellationToken cancellationToken);
     Task<Session?> GetSessionAsync(Guid sessionId, CancellationToken cancellationToken);
     Task<IReadOnlyList<Session>> GetSessionsAsync(Guid userId, CancellationToken cancellationToken);
     Task SaveRefreshTokenAsync(RefreshTokenNode token, CancellationToken cancellationToken);
     Task<RefreshTokenNode?> GetRefreshTokenAsync(string hash, CancellationToken cancellationToken);
     Task<IReadOnlyList<RefreshTokenNode>> GetFamilyTokensAsync(Guid familyId, CancellationToken cancellationToken);
+    Task SaveRoleAsync(Role role, CancellationToken cancellationToken);
+    Task<Role?> GetRoleByCodeAsync(string code, CancellationToken cancellationToken);
+    Task SaveUserRoleAsync(UserRole userRole, CancellationToken cancellationToken);
+    Task<IReadOnlyList<Role>> GetUserRolesAsync(Guid userId, CancellationToken cancellationToken);
+    Task SaveAuthAuditEventAsync(AuthAuditEvent auditEvent, CancellationToken cancellationToken);
+}
+
+public interface IAuditPublisher
+{
+    Task PublishAsync(AuthAuditEvent auditEvent, CancellationToken cancellationToken = default);
 }
