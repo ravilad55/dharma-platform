@@ -251,7 +251,7 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("ChallengeId")
+                    b.Property<Guid?>("ChallengeId")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("CorrelationId")

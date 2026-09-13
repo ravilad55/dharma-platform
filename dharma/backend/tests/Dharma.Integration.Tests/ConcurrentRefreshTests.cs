@@ -1,13 +1,17 @@
 using System.Collections.Concurrent;
+using System.Security.Cryptography;
+using System.Text;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Dharma.Infrastructure.Persistence;
 using Dharma.Identity.Application;
 using Dharma.Identity.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dharma.Integration.Tests;
 
@@ -24,12 +28,15 @@ public sealed class CapturingOtpProvider : IOtpProvider
     public bool TryGetOtp(string normalizedPhone, out string? otp) => _otps.TryGetValue(normalizedPhone, out otp);
 }
 
-public sealed class RedisEnabledWebApplicationFactory : WebApplicationFactory<Program>
+public sealed class RedisMySqlWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly CapturingOtpProvider _otpProvider = new();
+    private readonly string _databaseName = $"dharma_refresh_it_{Guid.NewGuid():N}";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Test");
+        builder.UseSetting("ConnectionStrings:Default", $"Server=localhost;Port=3306;Database={_databaseName};User=dharma;Password=dharma_local;");
         builder.UseSetting("Redis:ConnectionString", "localhost:6379");
     }
 
@@ -44,12 +51,23 @@ public sealed class RedisEnabledWebApplicationFactory : WebApplicationFactory<Pr
     }
 
     public bool TryGetOtp(string normalizedPhone, out string? otp) => _otpProvider.TryGetOtp(normalizedPhone, out otp);
+
+    public async Task InitializeAsync()
+    {
+        _ = CreateClient();
+        await using var scope = Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<DharmaDbContext>();
+        await dbContext.Database.EnsureDeletedAsync();
+        await dbContext.Database.MigrateAsync();
+    }
+
+    Task IAsyncLifetime.DisposeAsync() => Task.CompletedTask;
 }
 
-public sealed class ConcurrentRefreshTests(RedisEnabledWebApplicationFactory factory) : IClassFixture<RedisEnabledWebApplicationFactory>
+public sealed class ConcurrentRefreshTests(RedisMySqlWebApplicationFactory factory) : IClassFixture<RedisMySqlWebApplicationFactory>
 {
     private readonly HttpClient client = factory.CreateClient();
-    private readonly RedisEnabledWebApplicationFactory webFactory = factory;
+    private readonly RedisMySqlWebApplicationFactory webFactory = factory;
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     [Fact]
@@ -91,7 +109,7 @@ public sealed class ConcurrentRefreshTests(RedisEnabledWebApplicationFactory fac
     }
 
     [Fact]
-    public async Task ConcurrentRefresh_WithSameToken_ExactlyOneSucceeds()
+    public async Task ConcurrentRefresh_WithSameToken_RotatesExactlyOnce_AndPreventsReuse()
     {
         var phone = "+919876543210";
         var deviceId = "concurrent-device";
@@ -115,6 +133,7 @@ public sealed class ConcurrentRefreshTests(RedisEnabledWebApplicationFactory fac
         var verifyBody = await verifyResponse.Content.ReadFromJsonAsync<AuthSessionResponse>(JsonOptions);
         Assert.NotNull(verifyBody);
         var refreshToken = verifyBody!.RefreshToken;
+        var sessionId = verifyBody.SessionId;
 
         var task1 = client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = refreshToken, deviceId = deviceId });
         var task2 = client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = refreshToken, deviceId = deviceId });
@@ -143,16 +162,37 @@ public sealed class ConcurrentRefreshTests(RedisEnabledWebApplicationFactory fac
         Assert.False(string.IsNullOrEmpty(newRefreshToken));
         Assert.NotEqual(refreshToken, newRefreshToken);
 
+        await using (var scope = webFactory.Services.CreateAsyncScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<DharmaDbContext>();
+            var session = await dbContext.IdentitySessions.AsNoTracking().SingleAsync(x => x.Id == sessionId);
+            var familyTokens = await dbContext.IdentityRefreshTokens.AsNoTracking().Where(x => x.FamilyId == session.FamilyId).ToListAsync();
+            var originalHash = HashRefreshToken(refreshToken);
+            var successorHash = HashRefreshToken(newRefreshToken);
+
+            Assert.Equal(2, familyTokens.Count);
+            Assert.Equal(1, familyTokens.Count(x => x.TokenHash == successorHash));
+            Assert.Equal(1, familyTokens.Count(x => x.TokenHash == originalHash && x.ConsumedAt.HasValue));
+            Assert.Equal(1, familyTokens.Count(x => x.TokenHash == successorHash && x.ConsumedAt is null && x.RevokedAt is null));
+        }
+
         var reuseResponse = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = refreshToken, deviceId = deviceId });
         Assert.Equal(HttpStatusCode.Unauthorized, reuseResponse.StatusCode);
+        var reuseBody = await reuseResponse.Content.ReadAsStringAsync();
+        Assert.Contains("refresh_reuse_detected", reuseBody);
+
+        await using (var scope = webFactory.Services.CreateAsyncScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<DharmaDbContext>();
+            var session = await dbContext.IdentitySessions.AsNoTracking().SingleAsync(x => x.Id == sessionId);
+            var familyTokens = await dbContext.IdentityRefreshTokens.AsNoTracking().Where(x => x.FamilyId == session.FamilyId).ToListAsync();
+
+            Assert.Equal(Dharma.Identity.Domain.SessionState.SecurityRevoked, session.State);
+            Assert.All(familyTokens, token => Assert.NotNull(token.RevokedAt));
+        }
 
         var reuseWithNewResponse = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = newRefreshToken, deviceId = deviceId });
-        if (reuseWithNewResponse.StatusCode != HttpStatusCode.OK)
-        {
-            var errorBody = await reuseWithNewResponse.Content.ReadAsStringAsync();
-            Assert.Fail($"Expected OK but got {(int)reuseWithNewResponse.StatusCode}: {errorBody}");
-        }
-        Assert.Equal(HttpStatusCode.OK, reuseWithNewResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, reuseWithNewResponse.StatusCode);
     }
 
     [Fact]
@@ -197,6 +237,11 @@ public sealed class ConcurrentRefreshTests(RedisEnabledWebApplicationFactory fac
             Assert.Equal(1, succeeded);
             Assert.Equal(1, failed);
         }
+    }
+
+    private static string HashRefreshToken(string token)
+    {
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
     }
 
     private sealed record OtpRequestResponse(Guid ChallengeId, string MaskedPhone, DateTimeOffset ExpiresAtUtc, DateTimeOffset ResendAvailableAtUtc);

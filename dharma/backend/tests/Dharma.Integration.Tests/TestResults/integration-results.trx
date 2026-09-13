@@ -1,0 +1,303 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="392ba073-034a-4754-8535-13e5fe652443" name="RaviLad@IN-LT-000027 2026-09-11 16:44:41" runUser="AzureAD\RaviLad" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-09-11T16:44:41.1804103+05:30" queuing="2026-09-11T16:44:41.1804128+05:30" start="2026-09-11T16:44:30.9679740+05:30" finish="2026-09-11T16:44:44.9803780+05:30" />
+  <TestSettings name="default" id="47aff702-3761-4a5f-b927-cf9dc1263934">
+    <Deployment runDeploymentRoot="RaviLad_IN-LT-000027_2026-09-11_16_44_41" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="bac6a2aa-b0f3-4b06-bba9-a8e37d0c4e02" testId="4046f8c4-bc74-801e-cd15-f2554591598a" testName="Dharma.Integration.Tests.ApiFoundationTests.VersionedApiBasePathIsAvailable" computerName="IN-LT-000027" duration="00:00:00.0989468" startTime="2026-09-11T16:44:41.1359189+05:30" endTime="2026-09-11T16:44:41.2680528+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bac6a2aa-b0f3-4b06-bba9-a8e37d0c4e02" />
+    <UnitTestResult executionId="811797c0-44d0-4b1c-9716-69132ca1b625" testId="15356f72-64ff-8b2f-3975-baf330b31524" testName="Dharma.Integration.Tests.AuthApiTests.Me_ReturnsUnauthorized_WithoutToken" computerName="IN-LT-000027" duration="00:00:00.0707624" startTime="2026-09-11T16:44:41.3566275+05:30" endTime="2026-09-11T16:44:41.4382623+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="811797c0-44d0-4b1c-9716-69132ca1b625" />
+    <UnitTestResult executionId="e60690ea-96e5-436e-a2b9-0af3235fd51c" testId="1875bfae-7903-6c11-d8e3-43e95263a2e0" testName="Dharma.Integration.Tests.ApiFoundationTests.LiveHealthCheckIsAvailable" computerName="IN-LT-000027" duration="00:00:03.0186713" startTime="2026-09-11T16:44:37.8619615+05:30" endTime="2026-09-11T16:44:40.6407371+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e60690ea-96e5-436e-a2b9-0af3235fd51c" />
+    <UnitTestResult executionId="d83e59f6-0774-4042-a68a-65c2442065d0" testId="c76973ad-d950-c04d-0c0a-a1140533c343" testName="Dharma.Integration.Tests.ConcurrentRefreshTests.SingleRefresh_ThenReuse_Works" computerName="IN-LT-000027" duration="00:00:00.0010000" startTime="2026-09-11T16:44:44.5681284+05:30" endTime="2026-09-11T16:44:44.5681936+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d83e59f6-0774-4042-a68a-65c2442065d0">
+      <Output>
+        <ErrorInfo>
+          <Message>MySqlConnector.MySqlException : Unable to connect to any of the specified MySQL hosts.</Message>
+          <StackTrace>   at MySqlConnector.Core.ServerSession.OpenTcpSocketAsync(ConnectionSettings cs, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 1063&#xD;
+   at MySqlConnector.Core.ServerSession.ConnectAsync(ConnectionSettings cs, MySqlConnection connection, Int64 startingTimestamp, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 425&#xD;
+   at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlConnection.cs:line 932&#xD;
+   at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlConnection.cs:line 938&#xD;
+   at MySqlConnector.MySqlConnection.OpenAsync(Nullable`1 ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlConnection.cs:line 419&#xD;
+   at MySqlConnector.MySqlConnection.Open() in /_/src/MySqlConnector/MySqlConnection.cs:line 381&#xD;
+   at Microsoft.EntityFrameworkCore.ServerVersion.AutoDetect(String connectionString)&#xD;
+   at Dharma.Infrastructure.DependencyInjection.&lt;&gt;c__DisplayClass0_0.&lt;AddDharmaInfrastructure&gt;b__0(DbContextOptionsBuilder options) in C:\Data\TestProjects\dharma-platform\dharma\backend\src\Dharma.Infrastructure\DependencyInjection.cs:line 23&#xD;
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass1_0`2.&lt;AddDbContext&gt;b__0(IServiceProvider _, DbContextOptionsBuilder b)&#xD;
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)&#xD;
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass17_0`1.&lt;AddCoreServices&gt;b__0(IServiceProvider p)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.&lt;&gt;c__DisplayClass2_0.&lt;RealizeService&gt;b__0(ServiceProviderEngineScope scope)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)&#xD;
+   at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync() in C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs:line 59&#xD;
+   at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync() in C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs:line 61</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4e8f4bad-7cc9-49a4-9fae-bee6d2f85407" testId="03876ef8-8506-d967-d0ad-7bc75afb531a" testName="Dharma.Integration.Tests.ConcurrentRefreshTests.ConcurrentRefresh_Repeated_RunsSafely" computerName="IN-LT-000027" duration="00:00:00.0010000" startTime="2026-09-11T16:44:44.5538927+05:30" endTime="2026-09-11T16:44:44.5541067+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4e8f4bad-7cc9-49a4-9fae-bee6d2f85407">
+      <Output>
+        <ErrorInfo>
+          <Message>MySqlConnector.MySqlException : Unable to connect to any of the specified MySQL hosts.</Message>
+          <StackTrace>   at MySqlConnector.Core.ServerSession.OpenTcpSocketAsync(ConnectionSettings cs, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 1063&#xD;
+   at MySqlConnector.Core.ServerSession.ConnectAsync(ConnectionSettings cs, MySqlConnection connection, Int64 startingTimestamp, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 425&#xD;
+   at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlConnection.cs:line 932&#xD;
+   at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlConnection.cs:line 938&#xD;
+   at MySqlConnector.MySqlConnection.OpenAsync(Nullable`1 ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlConnection.cs:line 419&#xD;
+   at MySqlConnector.MySqlConnection.Open() in /_/src/MySqlConnector/MySqlConnection.cs:line 381&#xD;
+   at Microsoft.EntityFrameworkCore.ServerVersion.AutoDetect(String connectionString)&#xD;
+   at Dharma.Infrastructure.DependencyInjection.&lt;&gt;c__DisplayClass0_0.&lt;AddDharmaInfrastructure&gt;b__0(DbContextOptionsBuilder options) in C:\Data\TestProjects\dharma-platform\dharma\backend\src\Dharma.Infrastructure\DependencyInjection.cs:line 23&#xD;
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass1_0`2.&lt;AddDbContext&gt;b__0(IServiceProvider _, DbContextOptionsBuilder b)&#xD;
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)&#xD;
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass17_0`1.&lt;AddCoreServices&gt;b__0(IServiceProvider p)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.&lt;&gt;c__DisplayClass2_0.&lt;RealizeService&gt;b__0(ServiceProviderEngineScope scope)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)&#xD;
+   at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync() in C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs:line 59&#xD;
+   at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync() in C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs:line 61</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7ab92537-7ce2-47d4-9a53-c917452eda2f" testId="b648538c-e62e-4e5f-fc5d-71e4deee865e" testName="Dharma.Integration.Tests.ConcurrentRefreshTests.ConcurrentRefresh_WithSameToken_RotatesExactlyOnce_AndPreventsReuse" computerName="IN-LT-000027" duration="00:00:00.0010000" startTime="2026-09-11T16:44:44.4780594+05:30" endTime="2026-09-11T16:44:44.5311541+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7ab92537-7ce2-47d4-9a53-c917452eda2f">
+      <Output>
+        <ErrorInfo>
+          <Message>MySqlConnector.MySqlException : Unable to connect to any of the specified MySQL hosts.</Message>
+          <StackTrace>   at MySqlConnector.Core.ServerSession.OpenTcpSocketAsync(ConnectionSettings cs, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 1063&#xD;
+   at MySqlConnector.Core.ServerSession.ConnectAsync(ConnectionSettings cs, MySqlConnection connection, Int64 startingTimestamp, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 425&#xD;
+   at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlConnection.cs:line 932&#xD;
+   at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlConnection.cs:line 938&#xD;
+   at MySqlConnector.MySqlConnection.OpenAsync(Nullable`1 ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlConnection.cs:line 419&#xD;
+   at MySqlConnector.MySqlConnection.Open() in /_/src/MySqlConnector/MySqlConnection.cs:line 381&#xD;
+   at Microsoft.EntityFrameworkCore.ServerVersion.AutoDetect(String connectionString)&#xD;
+   at Dharma.Infrastructure.DependencyInjection.&lt;&gt;c__DisplayClass0_0.&lt;AddDharmaInfrastructure&gt;b__0(DbContextOptionsBuilder options) in C:\Data\TestProjects\dharma-platform\dharma\backend\src\Dharma.Infrastructure\DependencyInjection.cs:line 23&#xD;
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass1_0`2.&lt;AddDbContext&gt;b__0(IServiceProvider _, DbContextOptionsBuilder b)&#xD;
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)&#xD;
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass17_0`1.&lt;AddCoreServices&gt;b__0(IServiceProvider p)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.&lt;&gt;c__DisplayClass2_0.&lt;RealizeService&gt;b__0(ServiceProviderEngineScope scope)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)&#xD;
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)&#xD;
+   at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync() in C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs:line 59&#xD;
+   at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync() in C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs:line 61</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="91ff199a-5ca7-4e61-b611-3d591954d6f1" testId="c3ebe87a-ed6f-5784-8e1f-c6689f66e6ae" testName="Dharma.Integration.Tests.AuthApiTests.Refresh_ReturnsUnauthorized_ForInvalidToken" computerName="IN-LT-000027" duration="00:00:00.1776528" startTime="2026-09-11T16:44:40.8394013+05:30" endTime="2026-09-11T16:44:41.0649345+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="91ff199a-5ca7-4e61-b611-3d591954d6f1" />
+    <UnitTestResult executionId="aec3f693-95e0-4559-9d5f-e1fa28681137" testId="ffdcb12e-4440-2576-ed3f-10ec002e4fd2" testName="Dharma.Integration.Tests.ApiFoundationTests.UnknownApiRouteReturnsProblemDetails" computerName="IN-LT-000027" duration="00:00:00.1917437" startTime="2026-09-11T16:44:40.7687164+05:30" endTime="2026-09-11T16:44:40.9268305+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="aec3f693-95e0-4559-9d5f-e1fa28681137" />
+    <UnitTestResult executionId="3ea66143-f875-4cd0-91e1-cedb41fcf421" testId="393af512-e3dd-dbbd-9860-21cbcfd63609" testName="Dharma.Integration.Tests.AuthApiTests.RequestOtp_ReturnsAccepted_ForValidPhone" computerName="IN-LT-000027" duration="00:00:00.2825212" startTime="2026-09-11T16:44:41.0694625+05:30" endTime="2026-09-11T16:44:41.3553263+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3ea66143-f875-4cd0-91e1-cedb41fcf421" />
+    <UnitTestResult executionId="b343dd4a-7fe9-4be8-9025-96735b701e57" testId="18a7d6bb-2bad-5a64-7588-c6287b148a66" testName="Dharma.Integration.Tests.ApiFoundationTests.CorrelationIdIsPreservedAndReturned" computerName="IN-LT-000027" duration="00:00:00.1807886" startTime="2026-09-11T16:44:40.9281277+05:30" endTime="2026-09-11T16:44:41.1354879+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b343dd4a-7fe9-4be8-9025-96735b701e57" />
+    <UnitTestResult executionId="cbdb11d2-c8ea-45c8-b34b-e90d4b4cbf9e" testId="d059c842-ead6-d618-935a-2a40ca0060c1" testName="Dharma.Integration.Tests.AuthApiTests.RequestOtp_ReturnsValidationError_ForInvalidPhone" computerName="IN-LT-000027" duration="00:00:03.3629532" startTime="2026-09-11T16:44:37.8682253+05:30" endTime="2026-09-11T16:44:40.8296543+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cbdb11d2-c8ea-45c8-b34b-e90d4b4cbf9e" />
+    <UnitTestResult executionId="0127fcb5-0b10-4223-9567-efe2499e8b0d" testId="f344ad74-4672-3b74-a70b-44e5637f2716" testName="Dharma.Integration.Tests.AuthApiTests.VerifyOtp_ReturnsUnauthorized_ForInvalidCode" computerName="IN-LT-000027" duration="00:00:00.1501726" startTime="2026-09-11T16:44:41.4386611+05:30" endTime="2026-09-11T16:44:41.5978477+05:30" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0127fcb5-0b10-4223-9567-efe2499e8b0d" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Dharma.Integration.Tests.ApiFoundationTests.UnknownApiRouteReturnsProblemDetails" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="ffdcb12e-4440-2576-ed3f-10ec002e4fd2">
+      <Execution id="aec3f693-95e0-4559-9d5f-e1fa28681137" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.ApiFoundationTests" name="UnknownApiRouteReturnsProblemDetails" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.ConcurrentRefreshTests.ConcurrentRefresh_WithSameToken_RotatesExactlyOnce_AndPreventsReuse" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="b648538c-e62e-4e5f-fc5d-71e4deee865e">
+      <Execution id="7ab92537-7ce2-47d4-9a53-c917452eda2f" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.ConcurrentRefreshTests" name="ConcurrentRefresh_WithSameToken_RotatesExactlyOnce_AndPreventsReuse" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.ConcurrentRefreshTests.SingleRefresh_ThenReuse_Works" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="c76973ad-d950-c04d-0c0a-a1140533c343">
+      <Execution id="d83e59f6-0774-4042-a68a-65c2442065d0" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.ConcurrentRefreshTests" name="SingleRefresh_ThenReuse_Works" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.ConcurrentRefreshTests.ConcurrentRefresh_Repeated_RunsSafely" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="03876ef8-8506-d967-d0ad-7bc75afb531a">
+      <Execution id="4e8f4bad-7cc9-49a4-9fae-bee6d2f85407" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.ConcurrentRefreshTests" name="ConcurrentRefresh_Repeated_RunsSafely" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.ApiFoundationTests.VersionedApiBasePathIsAvailable" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="4046f8c4-bc74-801e-cd15-f2554591598a">
+      <Execution id="bac6a2aa-b0f3-4b06-bba9-a8e37d0c4e02" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.ApiFoundationTests" name="VersionedApiBasePathIsAvailable" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.AuthApiTests.Refresh_ReturnsUnauthorized_ForInvalidToken" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="c3ebe87a-ed6f-5784-8e1f-c6689f66e6ae">
+      <Execution id="91ff199a-5ca7-4e61-b611-3d591954d6f1" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.AuthApiTests" name="Refresh_ReturnsUnauthorized_ForInvalidToken" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.AuthApiTests.VerifyOtp_ReturnsUnauthorized_ForInvalidCode" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="f344ad74-4672-3b74-a70b-44e5637f2716">
+      <Execution id="0127fcb5-0b10-4223-9567-efe2499e8b0d" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.AuthApiTests" name="VerifyOtp_ReturnsUnauthorized_ForInvalidCode" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.ApiFoundationTests.LiveHealthCheckIsAvailable" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="1875bfae-7903-6c11-d8e3-43e95263a2e0">
+      <Execution id="e60690ea-96e5-436e-a2b9-0af3235fd51c" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.ApiFoundationTests" name="LiveHealthCheckIsAvailable" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.AuthApiTests.Me_ReturnsUnauthorized_WithoutToken" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="15356f72-64ff-8b2f-3975-baf330b31524">
+      <Execution id="811797c0-44d0-4b1c-9716-69132ca1b625" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.AuthApiTests" name="Me_ReturnsUnauthorized_WithoutToken" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.AuthApiTests.RequestOtp_ReturnsAccepted_ForValidPhone" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="393af512-e3dd-dbbd-9860-21cbcfd63609">
+      <Execution id="3ea66143-f875-4cd0-91e1-cedb41fcf421" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.AuthApiTests" name="RequestOtp_ReturnsAccepted_ForValidPhone" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.ApiFoundationTests.CorrelationIdIsPreservedAndReturned" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="18a7d6bb-2bad-5a64-7588-c6287b148a66">
+      <Execution id="b343dd4a-7fe9-4be8-9025-96735b701e57" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.ApiFoundationTests" name="CorrelationIdIsPreservedAndReturned" />
+    </UnitTest>
+    <UnitTest name="Dharma.Integration.Tests.AuthApiTests.RequestOtp_ReturnsValidationError_ForInvalidPhone" storage="c:\data\testprojects\dharma-platform\dharma\backend\tests\dharma.integration.tests\bin\release\net8.0\dharma.integration.tests.dll" id="d059c842-ead6-d618-935a-2a40ca0060c1">
+      <Execution id="cbdb11d2-c8ea-45c8-b34b-e90d4b4cbf9e" />
+      <TestMethod codeBase="C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\bin\Release\net8.0\Dharma.Integration.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Dharma.Integration.Tests.AuthApiTests" name="RequestOtp_ReturnsValidationError_ForInvalidPhone" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="4046f8c4-bc74-801e-cd15-f2554591598a" executionId="bac6a2aa-b0f3-4b06-bba9-a8e37d0c4e02" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="15356f72-64ff-8b2f-3975-baf330b31524" executionId="811797c0-44d0-4b1c-9716-69132ca1b625" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1875bfae-7903-6c11-d8e3-43e95263a2e0" executionId="e60690ea-96e5-436e-a2b9-0af3235fd51c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c76973ad-d950-c04d-0c0a-a1140533c343" executionId="d83e59f6-0774-4042-a68a-65c2442065d0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="03876ef8-8506-d967-d0ad-7bc75afb531a" executionId="4e8f4bad-7cc9-49a4-9fae-bee6d2f85407" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b648538c-e62e-4e5f-fc5d-71e4deee865e" executionId="7ab92537-7ce2-47d4-9a53-c917452eda2f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c3ebe87a-ed6f-5784-8e1f-c6689f66e6ae" executionId="91ff199a-5ca7-4e61-b611-3d591954d6f1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ffdcb12e-4440-2576-ed3f-10ec002e4fd2" executionId="aec3f693-95e0-4559-9d5f-e1fa28681137" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="393af512-e3dd-dbbd-9860-21cbcfd63609" executionId="3ea66143-f875-4cd0-91e1-cedb41fcf421" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="18a7d6bb-2bad-5a64-7588-c6287b148a66" executionId="b343dd4a-7fe9-4be8-9025-96735b701e57" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d059c842-ead6-d618-935a-2a40ca0060c1" executionId="cbdb11d2-c8ea-45c8-b34b-e90d4b4cbf9e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f344ad74-4672-3b74-a70b-44e5637f2716" executionId="0127fcb5-0b10-4223-9567-efe2499e8b0d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="12" executed="12" passed="9" failed="3" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.01] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 8.0.30)&#xD;
+[xUnit.net 00:00:00.50]   Discovering: Dharma.Integration.Tests&#xD;
+[xUnit.net 00:00:00.77]   Discovered:  Dharma.Integration.Tests&#xD;
+[xUnit.net 00:00:00.93]   Starting:    Dharma.Integration.Tests&#xD;
+[xUnit.net 00:00:08.19]       MySqlConnector.MySqlException : Unable to connect to any of the specified MySQL hosts.&#xD;
+[xUnit.net 00:00:08.20]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.20]         /_/src/MySqlConnector/Core/ServerSession.cs(1063,0): at MySqlConnector.Core.ServerSession.OpenTcpSocketAsync(ConnectionSettings cs, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.20]         /_/src/MySqlConnector/Core/ServerSession.cs(425,0): at MySqlConnector.Core.ServerSession.ConnectAsync(ConnectionSettings cs, MySqlConnection connection, Int64 startingTimestamp, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.20]         /_/src/MySqlConnector/MySqlConnection.cs(932,0): at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.20]         /_/src/MySqlConnector/MySqlConnection.cs(938,0): at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.20]         /_/src/MySqlConnector/MySqlConnection.cs(419,0): at MySqlConnector.MySqlConnection.OpenAsync(Nullable`1 ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.20]         /_/src/MySqlConnector/MySqlConnection.cs(381,0): at MySqlConnector.MySqlConnection.Open()&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.EntityFrameworkCore.ServerVersion.AutoDetect(String connectionString)&#xD;
+[xUnit.net 00:00:08.20]         C:\Data\TestProjects\dharma-platform\dharma\backend\src\Dharma.Infrastructure\DependencyInjection.cs(23,0): at Dharma.Infrastructure.DependencyInjection.&lt;&gt;c__DisplayClass0_0.&lt;AddDharmaInfrastructure&gt;b__0(DbContextOptionsBuilder options)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass1_0`2.&lt;AddDbContext&gt;b__0(IServiceProvider _, DbContextOptionsBuilder b)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass17_0`1.&lt;AddCoreServices&gt;b__0(IServiceProvider p)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+[xUnit.net 00:00:08.20]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+[xUnit.net 00:00:08.21]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.21]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)&#xD;
+[xUnit.net 00:00:08.21]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.&lt;&gt;c__DisplayClass2_0.&lt;RealizeService&gt;b__0(ServiceProviderEngineScope scope)&#xD;
+[xUnit.net 00:00:08.21]            at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)&#xD;
+[xUnit.net 00:00:08.21]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)&#xD;
+[xUnit.net 00:00:08.21]            at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)&#xD;
+[xUnit.net 00:00:08.21]            at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)&#xD;
+[xUnit.net 00:00:08.21]         C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs(59,0): at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync()&#xD;
+[xUnit.net 00:00:08.21]         C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs(61,0): at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync()&#xD;
+[xUnit.net 00:00:08.21]       MySqlConnector.MySqlException : Unable to connect to any of the specified MySQL hosts.&#xD;
+[xUnit.net 00:00:08.21]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.21]         /_/src/MySqlConnector/Core/ServerSession.cs(1063,0): at MySqlConnector.Core.ServerSession.OpenTcpSocketAsync(ConnectionSettings cs, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.21]         /_/src/MySqlConnector/Core/ServerSession.cs(425,0): at MySqlConnector.Core.ServerSession.ConnectAsync(ConnectionSettings cs, MySqlConnection connection, Int64 startingTimestamp, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.21]         /_/src/MySqlConnector/MySqlConnection.cs(932,0): at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.21]         /_/src/MySqlConnector/MySqlConnection.cs(938,0): at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.21]         /_/src/MySqlConnector/MySqlConnection.cs(419,0): at MySqlConnector.MySqlConnection.OpenAsync(Nullable`1 ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.21]         /_/src/MySqlConnector/MySqlConnection.cs(381,0): at MySqlConnector.MySqlConnection.Open()&#xD;
+[xUnit.net 00:00:08.21]            at Microsoft.EntityFrameworkCore.ServerVersion.AutoDetect(String connectionString)&#xD;
+[xUnit.net 00:00:08.21]         C:\Data\TestProjects\dharma-platform\dharma\backend\src\Dharma.Infrastructure\DependencyInjection.cs(23,0): at Dharma.Infrastructure.DependencyInjection.&lt;&gt;c__DisplayClass0_0.&lt;AddDharmaInfrastructure&gt;b__0(DbContextOptionsBuilder options)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass1_0`2.&lt;AddDbContext&gt;b__0(IServiceProvider _, DbContextOptionsBuilder b)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass17_0`1.&lt;AddCoreServices&gt;b__0(IServiceProvider p)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.&lt;&gt;c__DisplayClass2_0.&lt;RealizeService&gt;b__0(ServiceProviderEngineScope scope)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)&#xD;
+[xUnit.net 00:00:08.22]            at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)&#xD;
+[xUnit.net 00:00:08.22]         C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs(59,0): at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync()&#xD;
+[xUnit.net 00:00:08.22]         C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs(61,0): at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync()&#xD;
+[xUnit.net 00:00:08.22]       MySqlConnector.MySqlException : Unable to connect to any of the specified MySQL hosts.&#xD;
+[xUnit.net 00:00:08.23]       Stack Trace:&#xD;
+[xUnit.net 00:00:08.23]         /_/src/MySqlConnector/Core/ServerSession.cs(1063,0): at MySqlConnector.Core.ServerSession.OpenTcpSocketAsync(ConnectionSettings cs, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.23]         /_/src/MySqlConnector/Core/ServerSession.cs(425,0): at MySqlConnector.Core.ServerSession.ConnectAsync(ConnectionSettings cs, MySqlConnection connection, Int64 startingTimestamp, ILoadBalancer loadBalancer, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.23]         /_/src/MySqlConnector/MySqlConnection.cs(932,0): at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.23]         /_/src/MySqlConnector/MySqlConnection.cs(938,0): at MySqlConnector.MySqlConnection.CreateSessionAsync(ConnectionPool pool, Int64 startingTimestamp, Activity activity, Nullable`1 ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.23]         /_/src/MySqlConnector/MySqlConnection.cs(419,0): at MySqlConnector.MySqlConnection.OpenAsync(Nullable`1 ioBehavior, CancellationToken cancellationToken)&#xD;
+[xUnit.net 00:00:08.23]         /_/src/MySqlConnector/MySqlConnection.cs(381,0): at MySqlConnector.MySqlConnection.Open()&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.EntityFrameworkCore.ServerVersion.AutoDetect(String connectionString)&#xD;
+[xUnit.net 00:00:08.23]         C:\Data\TestProjects\dharma-platform\dharma\backend\src\Dharma.Infrastructure\DependencyInjection.cs(23,0): at Dharma.Infrastructure.DependencyInjection.&lt;&gt;c__DisplayClass0_0.&lt;AddDharmaInfrastructure&gt;b__0(DbContextOptionsBuilder options)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass1_0`2.&lt;AddDbContext&gt;b__0(IServiceProvider _, DbContextOptionsBuilder b)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.&lt;&gt;c__DisplayClass17_0`1.&lt;AddCoreServices&gt;b__0(IServiceProvider p)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.&lt;&gt;c__DisplayClass2_0.&lt;RealizeService&gt;b__0(ServiceProviderEngineScope scope)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)&#xD;
+[xUnit.net 00:00:08.23]            at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)&#xD;
+[xUnit.net 00:00:08.23]         C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs(59,0): at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync()&#xD;
+[xUnit.net 00:00:08.23]         C:\Data\TestProjects\dharma-platform\dharma\backend\tests\Dharma.Integration.Tests\ConcurrentRefreshTests.cs(61,0): at Dharma.Integration.Tests.RedisMySqlWebApplicationFactory.InitializeAsync()&#xD;
+[xUnit.net 00:00:08.24]   Finished:    Dharma.Integration.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="IN-LT-000027" outcome="Error" timestamp="2026-09-11T16:44:44.5373386+05:30">
+        <Text>[xUnit.net 00:00:08.19]     Dharma.Integration.Tests.ConcurrentRefreshTests.ConcurrentRefresh_WithSameToken_RotatesExactlyOnce_AndPreventsReuse [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="IN-LT-000027" outcome="Error" timestamp="2026-09-11T16:44:44.5553571+05:30">
+        <Text>[xUnit.net 00:00:08.21]     Dharma.Integration.Tests.ConcurrentRefreshTests.ConcurrentRefresh_Repeated_RunsSafely [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="IN-LT-000027" outcome="Error" timestamp="2026-09-11T16:44:44.5687020+05:30">
+        <Text>[xUnit.net 00:00:08.22]     Dharma.Integration.Tests.ConcurrentRefreshTests.SingleRefresh_ThenReuse_Works [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

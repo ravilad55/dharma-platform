@@ -1,5 +1,92 @@
 # Slice 1 Authentication Validation Report
 
+## Final remediation pass (current)
+
+Status: **SLICE 1 NOT READY FOR QA**
+
+### What was remediated
+
+- Added a mandatory concurrent refresh integration test using real EF persistence + Redis lock path:
+  - File: `backend/tests/Dharma.Integration.Tests/ConcurrentRefreshTests.cs`
+  - New test: `ConcurrentRefresh_WithSameToken_RotatesExactlyOnce_AndPreventsReuse`
+  - Verifies:
+    - two concurrent refresh calls on the same token produce exactly one `200` and one safe failure (`409` + `refresh_concurrent`)
+    - exactly one successor refresh token is created
+    - no duplicate successor token hash exists
+    - original token cannot be reused (`401` + `refresh_reuse_detected`)
+    - token family is security-revoked after reuse detection
+    - session state becomes `SecurityRevoked`
+- Fixed EF model snapshot mismatch for audit challenge relationship typing:
+  - File: `backend/src/Dharma.Infrastructure/Persistence/Migrations/DharmaDbContextModelSnapshot.cs`
+  - `AuthAuditEventRecord.ChallengeId` aligned to nullable `Guid`.
+
+### Execution results (current environment)
+
+#### Backend
+
+- `dotnet restore Dharma.sln`: **failed** initially due unreachable private NuGet source and audit source lookup (`NU1301`/`NU1900`).
+- `dotnet build Dharma.sln --configuration Release --no-restore`: **passed** (warnings present for unreachable private feed).
+- `dotnet test tests/Dharma.Unit.Tests/... --configuration Release --no-build --no-restore`: **passed** (`21/21`).
+- `dotnet test tests/Dharma.Architecture.Tests/... --configuration Release --no-build --no-restore`: **passed** (`5/5`).
+- `dotnet test tests/Dharma.Integration.Tests/... --configuration Release --no-build --no-restore`: **failed** (`9 passed / 3 failed`).
+  - All 3 failures are the concurrent refresh tests requiring MySQL connectivity.
+  - Failure reason: `MySqlConnector.MySqlException: Unable to connect to any of the specified MySQL hosts`.
+
+#### Migration validation (`IdentityCustomerAndAudit`)
+
+- **CLEAN CLONE MIGRATION VALIDATION = UNVERIFIED in this environment**.
+- Reason: Docker is unavailable (`docker` command not found), so clean MySQL provisioning and migration-chain execution could not be performed here.
+- Static migration/model inspection was performed; snapshot typing issue was corrected as noted above.
+
+#### Mobile validation
+
+- `npm ci`, `npm run typecheck`, `npm run lint`, `npm test`: **not executable here** (`npm` command not found).
+- **MOBILE TEST EXECUTION = UNVERIFIED**.
+
+#### Infrastructure validation
+
+- `docker compose config`: **not executable here** (`docker` command not found).
+- MySQL health / Redis PONG / OpenSearch green: **UNVERIFIED in this environment**.
+
+#### CI review
+
+- Workflow inspected: `.github/workflows/ci.yml`.
+- Uses `actions/setup-dotnet` with `dotnet-version: 8.0.x`.
+- Includes backend restore/build/unit/architecture/integration steps.
+- Includes mobile install/typecheck/lint/test/audit steps.
+- Includes `docker compose config` infrastructure step.
+- **REMOTE CI = UNVERIFIED** (no remote run executed from this environment).
+
+### Test quality review (mobile)
+
+- Existing mobile tests discovered:
+  - `mobile/app/index.test.tsx`
+  - `mobile/src/auth/__tests__/store.test.ts`
+- Current suite does **not** yet demonstrate full coverage for the required matrix (invalid OTP UI path, loading/error/resend UX, protected navigation gates, refresh failure UI flow, logout flow, etc.).
+
+### Remaining risks
+
+1. Required infra-backed integration tests cannot be executed in this container until MySQL/Redis are available.
+2. Clean clone migration-chain verification remains pending against a fresh MySQL database.
+3. Mobile test execution remains pending in a supported Node/Expo/Jest environment.
+4. Full auth matrix still has unverified scenarios in automated tests (especially mobile UX flows and some backend error-path combinations).
+
+### Gate decision (current)
+
+- Concurrent refresh test added: **YES**
+- Concurrent refresh test executed and passed: **NO (environment blocked)**
+- Clean migration validation passed: **NO (unverified)**
+- Backend unit tests passed: **YES**
+- Backend integration tests passed: **NO**
+- API contract tests passed: **partially (subset passed; suite failed overall due infra-backed tests)**
+- Mobile tests executed and passed: **NO (unverified)**
+- TypeScript/ESLint executed: **NO (unverified in this environment)**
+- Docker infra validation executed: **NO (unverified)**
+- Security validation (`npm audit`) executed: **NO (unverified in this environment)**
+- Slice 0 regression fully re-validated end-to-end: **NO (blocked by above)**
+
+**Final verdict (current run): SLICE 1 NOT READY FOR QA**
+
 Status: validation complete, ready for QA
 
 ## Environment

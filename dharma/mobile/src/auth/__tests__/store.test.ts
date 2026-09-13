@@ -1,25 +1,22 @@
 import { useAuthStore } from "../store";
-import { clearAccessToken, setAccessToken } from "../../api/client";
+import api, { setAccessToken } from "../../api/client";
 
 jest.mock("expo-secure-store", () => ({
+  isAvailableAsync: jest.fn().mockResolvedValue(true),
   getItemAsync: jest.fn(),
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
 }));
 
-jest.mock("axios", () => {
-  const actual = jest.requireActual("axios");
+jest.mock("../../api/client", () => {
+  const actual = jest.requireActual("../../api/client");
   return {
+    __esModule: true,
     ...actual,
-    create: jest.fn(() => ({
-      ...actual,
+    default: {
       post: jest.fn(),
       get: jest.fn(),
-      interceptors: {
-        request: { use: jest.fn() },
-        response: { use: jest.fn() },
-      },
-    })),
+    },
   };
 });
 
@@ -31,11 +28,10 @@ describe("useAuthStore", () => {
   });
 
   it("sets authenticated state on login", async () => {
-    const mockPost = require("axios").create().post;
-    mockPost.mockResolvedValueOnce({
+    (api.post as jest.Mock).mockResolvedValueOnce({
       data: { challengeId: "challenge-1", maskedPhone: "+919******10", expiresAtUtc: "2026-01-01T00:05:00Z", resendAvailableAtUtc: "2026-01-01T00:00:30Z" },
     });
-    mockPost.mockResolvedValueOnce({
+    (api.post as jest.Mock).mockResolvedValueOnce({
       data: {
         user: { id: "user-1", displayName: "Test", scope: "CUSTOMER", sessionId: "session-1" },
         accessToken: "access-1",
