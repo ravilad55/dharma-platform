@@ -15,6 +15,9 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
 {
     [AllowAnonymous]
     [HttpPost("request-otp")]
+    [ProducesResponseType(typeof(OtpRequestResult), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> RequestOtp(OtpRequest request, CancellationToken cancellationToken)
     {
         try
@@ -27,6 +30,9 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("verify-otp")]
+    [ProducesResponseType(typeof(AuthSession), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> VerifyOtp(VerifyOtpRequest request, CancellationToken cancellationToken)
     {
         try
@@ -39,6 +45,9 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("refresh")]
+    [ProducesResponseType(typeof(AuthSession), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Refresh(RefreshRequest request, CancellationToken cancellationToken)
     {
         try { return Ok(await authService.RefreshAsync(request, cancellationToken)); }
@@ -47,6 +56,9 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
 
     [Authorize(Roles = "CUSTOMER")]
     [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Logout(LogoutRequest request, CancellationToken cancellationToken)
     {
         if (!TryGetIdentity(out var userId, out _)) return Unauthorized();
@@ -60,6 +72,9 @@ public sealed class AuthController(IAuthService authService) : ControllerBase
 
     [Authorize(Roles = "CUSTOMER")]
     [HttpGet("me")]
+    [ProducesResponseType(typeof(CurrentUser), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Me(CancellationToken cancellationToken)
     {
         if (!TryGetIdentity(out var userId, out var sessionId)) return Unauthorized();

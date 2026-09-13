@@ -1,10 +1,13 @@
 using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Dharma.Infrastructure.Persistence.Migrations
 {
+    [DbContext(typeof(DharmaDbContext))]
+    [Migration("20260910200000_IdentityCustomerAndAudit")]
     /// <inheritdoc />
     public partial class IdentityCustomerAndAudit : Migration
     {
