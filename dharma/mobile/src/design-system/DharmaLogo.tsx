@@ -4,12 +4,14 @@ import { colors, spacing } from "./tokens";
 
 interface DharmaLogoProps {
   size?: "small" | "medium" | "large";
+  variant?: "default" | "light";
   style?: ViewStyle;
 }
 
-export function DharmaLogo({ size = "medium", style }: DharmaLogoProps) {
+export function DharmaLogo({ size = "medium", variant = "default", style }: DharmaLogoProps) {
   const isSmall = size === "small";
   const isLarge = size === "large";
+  const isLight = variant === "light";
 
   const scale = isSmall ? 0.75 : isLarge ? 1.25 : 1;
   const wordmarkSize = isSmall ? 20 : isLarge ? 30 : 24;
@@ -35,6 +37,8 @@ export function DharmaLogo({ size = "medium", style }: DharmaLogoProps) {
               height: 32 * scale,
               borderRadius: (32 * scale) / 2,
               top: 2 * scale,
+              backgroundColor: isLight ? "#FEF08A" : colors.saffronLight,
+              opacity: isLight ? 0.45 : 0.6,
             },
           ]}
         />
@@ -81,6 +85,7 @@ export function DharmaLogo({ size = "medium", style }: DharmaLogoProps) {
               borderBottomLeftRadius: 22 * scale,
               borderBottomRightRadius: 22 * scale,
               top: 22 * scale,
+              backgroundColor: isLight ? colors.saffron : colors.primary,
             },
           ]}
         >
@@ -90,6 +95,7 @@ export function DharmaLogo({ size = "medium", style }: DharmaLogoProps) {
               styles.diyaRim,
               {
                 height: 3 * scale,
+                backgroundColor: isLight ? "#FEF08A" : colors.saffron,
               },
             ]}
           />
@@ -104,6 +110,7 @@ export function DharmaLogo({ size = "medium", style }: DharmaLogoProps) {
               height: 4 * scale,
               borderRadius: 2 * scale,
               top: 36 * scale,
+              backgroundColor: isLight ? "#B45309" : colors.saffronDark,
             },
           ]}
         />
@@ -117,6 +124,7 @@ export function DharmaLogo({ size = "medium", style }: DharmaLogoProps) {
             {
               fontSize: wordmarkSize,
               letterSpacing: isSmall ? 2.5 : 4,
+              color: isLight ? colors.warmCream : colors.primary,
             },
           ]}
         >

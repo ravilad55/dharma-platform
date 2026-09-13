@@ -12,7 +12,7 @@ import { borderRadius, colors, shadows, spacing } from "./tokens";
 export interface DharmaButtonProps {
   title: string;
   onPress: () => void;
-  variant?: "primary" | "secondary" | "outline" | "text";
+  variant?: "primary" | "secondary" | "outline" | "text" | "cream";
   size?: "medium" | "large";
   disabled?: boolean;
   loading?: boolean;
@@ -51,10 +51,12 @@ export function DharmaButton({
         variant === "secondary" && styles.secondaryBase,
         variant === "outline" && styles.outlineBase,
         variant === "text" && styles.textBase,
+        variant === "cream" && styles.creamBase,
         pressed && isInteractive && variant === "primary" && styles.primaryPressed,
         pressed && isInteractive && variant === "secondary" && styles.secondaryPressed,
         pressed && isInteractive && variant === "outline" && styles.outlinePressed,
         pressed && isInteractive && variant === "text" && styles.textPressed,
+        pressed && isInteractive && variant === "cream" && styles.creamPressed,
         disabled && styles.disabledBase,
         style,
       ]}
@@ -65,7 +67,7 @@ export function DharmaButton({
           color={
             variant === "primary"
               ? colors.white
-              : variant === "outline" || variant === "secondary"
+              : variant === "outline" || variant === "secondary" || variant === "cream"
               ? colors.primary
               : colors.primary
           }
@@ -80,6 +82,7 @@ export function DharmaButton({
             variant === "secondary" && styles.secondaryText,
             variant === "outline" && styles.outlineText,
             variant === "text" && styles.textVariantText,
+            variant === "cream" && styles.creamText,
             disabled && styles.disabledText,
             textStyle,
           ]}
@@ -113,6 +116,13 @@ const styles = StyleSheet.create({
   },
   primaryPressed: {
     backgroundColor: colors.primaryActive,
+  },
+  creamBase: {
+    backgroundColor: colors.warmCream,
+    ...shadows.md,
+  },
+  creamPressed: {
+    backgroundColor: colors.warmCreamDark,
   },
   secondaryBase: {
     backgroundColor: colors.primaryLight,
@@ -157,6 +167,10 @@ const styles = StyleSheet.create({
   },
   primaryText: {
     color: colors.white,
+  },
+  creamText: {
+    color: colors.primary,
+    fontWeight: "700",
   },
   secondaryText: {
     color: colors.primary,

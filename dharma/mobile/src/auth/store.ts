@@ -1,7 +1,13 @@
 import { create } from "zustand";
 
 import api, { clearAccessToken, setAccessToken } from "../api/client";
-import { clearRefreshMaterial, readRefreshMaterial, writeRefreshMaterial } from "./storage";
+import {
+  clearRefreshMaterial,
+  readOnboardingCompleted,
+  readRefreshMaterial,
+  writeOnboardingCompleted,
+  writeRefreshMaterial,
+} from "./storage";
 import type { AuthSession, AuthUser, OtpRequestResult } from "./types";
 
 type AuthStatus = "bootstrapping" | "unauthenticated" | "authenticated";
@@ -11,10 +17,14 @@ type AuthState = {
   user: AuthUser | null;
   challenge: OtpRequestResult | null;
   phoneNumber: string;
+  onboardingCompleted: boolean;
   bootstrap: () => Promise<void>;
-  requestOtp: (phoneNumber: string, deviceId: string) => Promise<OtpRequestResult>;
-  verifyOtp: (otp: string, deviceId: string, displayName?: string) => Promise<void>;
+  setOnboardingCompleted: (completed: boolean) => Promise<void>;
+  requestOtp: (phoneNumber: string, deviceId?: string) => Promise<OtpRequestResult>;
+  verifyOtp: (otp: string, deviceId?: string, displayName?: string) => Promise<void>;
+  resendOtp: () => Promise<OtpRequestResult>;
   logout: () => Promise<void>;
+  reset: () => void;
 };
 
 const deviceId = "customer-mobile-device";
@@ -22,7 +32,8 @@ const deviceId = "customer-mobile-device";
 function applySession(session: AuthSession) {
   setAccessToken(session.accessToken);
   void writeRefreshMaterial(session.refreshToken, session.sessionId);
-  return { status: "authenticated" as const, user: session.user };
+  void writeOnboardingCompleted(true);
+  return { status: "authenticated" as const, user: session.user, onboardingCompleted: true };
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -30,10 +41,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   challenge: null,
   phoneNumber: "",
+  onboardingCompleted: false,
   bootstrap: async () => {
+    const isCompleted = await readOnboardingCompleted();
     const material = await readRefreshMaterial();
+
     if (!material) {
-      set({ status: "unauthenticated", user: null });
+      set({ status: "unauthenticated", user: null, onboardingCompleted: isCompleted });
       return;
     }
 
@@ -41,12 +55,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const response = await api.post<AuthSession>("/auth/refresh", material);
       const sessionState = applySession(response.data);
       const currentUser = await api.get<AuthUser>("/auth/me");
-      set({ ...sessionState, user: currentUser.data });
+      set({ ...sessionState, user: currentUser.data, onboardingCompleted: true });
     } catch {
       clearAccessToken();
       await clearRefreshMaterial();
-      set({ status: "unauthenticated", user: null });
+      set({ status: "unauthenticated", user: null, onboardingCompleted: isCompleted });
     }
+  },
+  setOnboardingCompleted: async (completed: boolean) => {
+    await writeOnboardingCompleted(completed);
+    set({ onboardingCompleted: completed });
   },
   requestOtp: async (phoneNumber, requestedDeviceId = deviceId) => {
     const response = await api.post<OtpRequestResult>("/auth/request-otp", {
@@ -68,13 +86,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
     set({ ...applySession(response.data), challenge: null });
   },
+  resendOtp: async () => {
+    const { phoneNumber } = get();
+    if (!phoneNumber) throw new Error("Phone number is missing.");
+    const response = await api.post<OtpRequestResult>("/auth/request-otp", {
+      phoneNumber,
+      deviceId,
+    });
+    set({ challenge: response.data });
+    return response.data;
+  },
   logout: async () => {
     try {
       await api.post("/auth/logout", { allSessions: false });
+    } catch {
+      // Ignore network failure during logout
     } finally {
       clearAccessToken();
       await clearRefreshMaterial();
       set({ status: "unauthenticated", user: null, challenge: null, phoneNumber: "" });
     }
+  },
+  reset: () => {
+    clearAccessToken();
+    set({ status: "unauthenticated", user: null, challenge: null, phoneNumber: "" });
   },
 }));

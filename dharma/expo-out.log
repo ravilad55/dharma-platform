@@ -1,0 +1,14 @@
+
+> dharma-mobile@0.1.0 start
+> expo start --web -c
+
+Starting project at C:\Data\TestProjects\dharma-platform\dharma\mobile
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Web Bundled 57572ms node_modules\expo-router\entry.js (780 modules)
+Web Bundled 57654ms node_modules\expo-router\entry.js (1 module)
+Web Bundled 57749ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+ LOG  [web] Logs will appear in the browser console

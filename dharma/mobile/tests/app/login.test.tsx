@@ -130,7 +130,16 @@ describe("Dharma Login Screen (Screen #4)", () => {
   });
 
   it("shows error banner when OTP request fails", async () => {
-    const mockRequestOtp = jest.fn().mockRejectedValue(new Error("Network Error"));
+    const mockRequestOtp = jest.fn().mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 429,
+        data: {
+          title: "Too many OTP requests. Please wait before trying again.",
+          status: 429,
+        },
+      },
+    });
     useAuthStore.setState({ requestOtp: mockRequestOtp });
 
     const screen = render(<LoginScreen />);
@@ -144,7 +153,7 @@ describe("Dharma Login Screen (Screen #4)", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("We could not send a verification code. Please try again.")
+        screen.getByText("Too many OTP requests. Please wait before trying again.")
       ).toBeTruthy();
     });
   });

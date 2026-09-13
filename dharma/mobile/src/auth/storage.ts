@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 
 const refreshTokenKey = "dharma.refresh-token";
 const sessionIdKey = "dharma.session-id";
+const onboardingCompletedKey = "dharma_onboarding_completed";
 
 async function isSecureStoreAvailable(): Promise<boolean> {
   if (Platform.OS === "web") {
@@ -57,4 +58,39 @@ export async function clearRefreshMaterial() {
     SecureStore.deleteItemAsync(refreshTokenKey),
     SecureStore.deleteItemAsync(sessionIdKey),
   ]);
+}
+
+export async function readOnboardingCompleted(): Promise<boolean> {
+  if (!(await isSecureStoreAvailable())) {
+    if (typeof window !== "undefined" && window.localStorage) {
+      return window.localStorage.getItem(onboardingCompletedKey) === "true";
+    }
+    return false;
+  }
+
+  const value = await SecureStore.getItemAsync(onboardingCompletedKey);
+  return value === "true";
+}
+
+export async function writeOnboardingCompleted(completed = true): Promise<void> {
+  const value = completed ? "true" : "false";
+  if (!(await isSecureStoreAvailable())) {
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.setItem(onboardingCompletedKey, value);
+    }
+    return;
+  }
+
+  await SecureStore.setItemAsync(onboardingCompletedKey, value);
+}
+
+export async function clearOnboardingCompleted(): Promise<void> {
+  if (!(await isSecureStoreAvailable())) {
+    if (typeof window !== "undefined" && window.localStorage) {
+      window.localStorage.removeItem(onboardingCompletedKey);
+    }
+    return;
+  }
+
+  await SecureStore.deleteItemAsync(onboardingCompletedKey);
 }

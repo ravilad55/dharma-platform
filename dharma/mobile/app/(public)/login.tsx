@@ -10,9 +10,10 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 
 import { useAuthStore } from "../../src/auth/store";
+import { getErrorMessage } from "../../src/api/errors";
 import {
   borderRadius,
   colors,
@@ -35,7 +36,12 @@ export default function LoginScreen() {
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [isOtpLoading, setIsOtpLoading] = useState(false);
 
+  const status = useAuthStore((state) => state.status);
   const requestOtp = useAuthStore((state) => state.requestOtp);
+
+  if (status === "authenticated") {
+    return <Redirect href="/(protected)/home" />;
+  }
 
   const normalizePhone = (raw: string): string => {
     const cleaned = raw.replace(/[^\d+]/g, "");
@@ -89,9 +95,13 @@ export default function LoginScreen() {
         pathname: "/(public)/verify-otp",
         params: { challengeId: challenge.challengeId },
       });
-    } catch {
+    } catch (err) {
       setIsOtpLoading(false);
-      setGeneralError("We could not send a verification code. Please try again.");
+      const message = getErrorMessage(
+        err,
+        "We could not send a verification code. Please try again."
+      );
+      setGeneralError(message);
     }
   };
 

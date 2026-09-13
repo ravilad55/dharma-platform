@@ -4,3 +4,7 @@ export * from "./DharmaButton";
 export * from "./PhoneInput";
 export * from "./PasswordInput";
 export * from "./DharmaCheckbox";
+export * from "./OtpInput";
+export * from "./icons";
+export * from "./OnboardingComponents";
+export * from "./HomeComponents";

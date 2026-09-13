@@ -7,6 +7,7 @@ using Dharma.Identity.Domain;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Dharma.SharedKernel.Abstractions;
@@ -19,6 +20,8 @@ public sealed class DevelopmentOtpProvider(IHostEnvironment environment) : IOtpP
     {
         if (!environment.IsDevelopment() && !environment.IsEnvironment("Test"))
             return Task.FromResult(new OtpDeliveryResult(false));
+
+        Console.WriteLine($"[DevelopmentOtpProvider] Verification code for {normalizedPhone}: {otp}");
         return Task.FromResult(new OtpDeliveryResult(true, "development-provider"));
     }
 }

@@ -1,11 +1,13 @@
+import React, { useEffect } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { Redirect } from "expo-router";
-import { ActivityIndicator, View } from "react-native";
-import { useEffect } from "react";
 
 import { useAuthStore } from "../src/auth/store";
+import { colors, DharmaLogo, spacing } from "../src/design-system";
 
 export default function Index() {
   const status = useAuthStore((state) => state.status);
+  const onboardingCompleted = useAuthStore((state) => state.onboardingCompleted);
   const bootstrap = useAuthStore((state) => state.bootstrap);
 
   useEffect(() => {
@@ -14,11 +16,41 @@ export default function Index() {
 
   if (status === "bootstrapping") {
     return (
-      <View>
-        <ActivityIndicator accessibilityLabel="Restoring session" />
+      <View style={styles.splashContainer}>
+        <DharmaLogo size="large" />
+        <View style={styles.spinnerContainer}>
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            accessibilityLabel="Restoring session"
+          />
+        </View>
       </View>
     );
   }
 
-  return status === "authenticated" ? <Redirect href="/(protected)/home" /> : <Redirect href="/(public)/login" />;
+  // Case C: Authenticated user goes directly to Home
+  if (status === "authenticated") {
+    return <Redirect href="/(protected)/home" />;
+  }
+
+  // Case A: First install (unauthenticated and onboarding not yet completed)
+  if (!onboardingCompleted) {
+    return <Redirect href="/(onboarding)/onboarding-1" />;
+  }
+
+  // Case B & D: Unauthenticated user with completed onboarding goes to Login
+  return <Redirect href="/(public)/login" />;
 }
+
+const styles = StyleSheet.create({
+  splashContainer: {
+    flex: 1,
+    backgroundColor: colors.warmCream,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  spinnerContainer: {
+    marginTop: spacing.xl,
+  },
+});
