@@ -84,6 +84,12 @@ Each module owns its entities, commands, queries, validation, policies, persiste
 - Dependencies: PoojaSamagri/Restaurant catalog contracts, Customer address, Payment, Delivery, Notification.
 - Events: OrderPlaced, OrderPaid, OrderAccepted, OrderReady, OrderOutForDelivery, OrderDelivered, OrderCancelled.
 
+### Order creation boundary
+
+Before ORDER-07 creates an order, it must acquire the existing customer cart lock and consume `IOrderCartRevalidationService`. The revalidation read comes from MySQL and reloads current catalog price, name, SKU, availability, and merchant ownership; Redis is coordination only. It does not reserve inventory or process payment.
+
+ORDER-07 must create immutable `OrderItem` data through `OrderProductSnapshotFactory` from the revalidated `OrderProductSnapshotData`, never from mobile values or cart totals. It must load the selected customer address through a customer-scoped source and construct its immutable `OrderAddress` through `OrderAddressSnapshotFactory`. Product and address snapshots remain historical data after the transaction commits.
+
 ## Payment
 
 - Responsibility: Stripe INR PaymentIntents, provider references, webhook verification, payment status, void/refund workflow, reconciliation.

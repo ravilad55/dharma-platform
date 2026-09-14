@@ -4,6 +4,8 @@ using Dharma.Infrastructure.Redis;
 using Dharma.Identity.Application;
 using Dharma.Identity.Infrastructure;
 using Dharma.PoojaSamagri.Application;
+using Dharma.Order.Application;
+using Dharma.Customer.Application;
 using Dharma.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +20,12 @@ public static class DependencyInjection
     {
         services.AddIdentityInfrastructure(configuration, environment);
         services.AddScoped<ICatalogQueryService, PoojaSamagriCatalogQueryService>();
+        services.AddScoped<ICartService, CartService>();
+        services.AddScoped<ICartStore, EfCartStore>();
+        services.AddScoped<IOrderCartRevalidationStore, EfCartStore>();
+        services.AddScoped<IOrderCartRevalidationService, OrderCartRevalidationService>();
+        services.AddScoped<IAddressService, AddressService>();
+        services.AddScoped<IAddressStore, EfAddressStore>();
         var connectionString = configuration.GetConnectionString("Default");
         if (!string.IsNullOrWhiteSpace(connectionString))
         {
