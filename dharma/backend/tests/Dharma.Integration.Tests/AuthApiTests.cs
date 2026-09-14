@@ -57,6 +57,15 @@ public sealed class AuthApiTests(WebApplicationFactory<Program> factory) : IClas
     }
 
     [Fact]
+    public async Task Refresh_ReturnsBadRequest_WhenDeviceIdIsMissing()
+    {
+        var response = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = "invalid" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
     public async Task Me_ReturnsUnauthorized_WithoutToken()
     {
         var response = await client.GetAsync("/api/v1/auth/me");

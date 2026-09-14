@@ -90,6 +90,12 @@ Before ORDER-07 creates an order, it must acquire the existing customer cart loc
 
 ORDER-07 must create immutable `OrderItem` data through `OrderProductSnapshotFactory` from the revalidated `OrderProductSnapshotData`, never from mobile values or cart totals. It must load the selected customer address through a customer-scoped source and construct its immutable `OrderAddress` through `OrderAddressSnapshotFactory`. Product and address snapshots remain historical data after the transaction commits.
 
+### Transactional order creation
+
+`POST /api/v1/orders` accepts only a customer-selected address ID and requires a customer-scoped `Idempotency-Key`. ORDER-07 acquires the customer cart lock, revalidates the MySQL cart, performs the customer-scoped address lookup, creates immutable product and address snapshots, writes a `Pending` order with its initial status history, clears the cart, and persists the idempotency result in one MySQL transaction. Redis coordinates the lock but is not authoritative.
+
+The idempotency record is unique by customer and key; replaying an identical request returns its original order, while a different request with the same key is rejected. Payment is not performed here. Only future server-side payment verification may transition `Pending` to `Confirmed`. Inventory reservation and decrement remain deferred to the Inventory slice.
+
 ## Payment
 
 - Responsibility: Stripe INR PaymentIntents, provider references, webhook verification, payment status, void/refund workflow, reconciliation.

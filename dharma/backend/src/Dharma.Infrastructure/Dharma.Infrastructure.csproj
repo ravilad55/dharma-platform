@@ -3,6 +3,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Dharma.Shared\Dharma.Shared.csproj" />
     <ProjectReference Include="..\Identity\Infrastructure\Dharma.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\Customer\Application\Dharma.Customer.Application.csproj" />
+    <ProjectReference Include="..\Customer\Domain\Dharma.Customer.Domain.csproj" />
+    <ProjectReference Include="..\Order\Application\Dharma.Order.Application.csproj" />
+    <ProjectReference Include="..\Order\Domain\Dharma.Order.Domain.csproj" />
     <ProjectReference Include="..\PoojaSamagri\Application\Dharma.PoojaSamagri.Application.csproj" />
   </ItemGroup>
 

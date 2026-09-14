@@ -193,7 +193,7 @@ describe("Auth Store & Lifecycle", () => {
 
       expect(api.post).toHaveBeenCalledWith("/auth/refresh", {
         refreshToken: "valid-stored-refresh-token",
-        sessionId: "session-456",
+        deviceId: "customer-mobile-device",
       });
       expect(api.get).toHaveBeenCalledWith("/auth/me");
 

@@ -1,11 +1,11 @@
 import React from "react";
-import { fireEvent, render } from "@testing-library/react-native";
+import { render } from "@testing-library/react-native";
 
 import SamagriScreen from "../../app/(protected)/samagri";
 import { getLocalProductImage } from "../../src/features/samagri/productImages";
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn() },
+  router: { back: jest.fn(), push: jest.fn() },
 }));
 
 jest.mock("react-native-safe-area-context", () => ({
@@ -40,6 +40,8 @@ jest.mock("../../src/api/catalog", () => ({
 }));
 
 jest.mock("@tanstack/react-query", () => ({
+  useQueryClient: jest.fn(() => ({ setQueryData: jest.fn() })),
+  useMutation: jest.fn(() => ({ isPending: false, isError: false, mutate: jest.fn() })),
   useQuery: jest.fn(({ queryKey }: { queryKey: string[] }) => queryKey[0] === "product-categories"
     ? { data: [
       { id: "kits", name: "Kits", sortOrder: 1 },
@@ -48,7 +50,9 @@ jest.mock("@tanstack/react-query", () => ({
       { id: "incense", name: "Incense", sortOrder: 4 },
       { id: "more", name: "More", sortOrder: 5 },
     ], isLoading: false, isError: false }
-    : { data: { items: [{
+    : queryKey[0] === "cart"
+      ? { data: { id: "cart-1", shopId: "shop-1", shopName: "Dharma Store", currency: "INR", items: [], subtotal: 0, deliveryCharge: 0, serviceCharge: 0, total: 0, itemCount: 0 }, isLoading: false, isError: false }
+      : { data: { items: [{
       id: "kit-1",
       name: "Griha Pravesh Kit",
       shortDescription: "Everything you need for your new home ceremony.",
@@ -85,11 +89,7 @@ describe("Pooja Samagri screen", () => {
     expect(screen.getByText("₹699")).toBeTruthy();
     expect(screen.getByText("In Stock")).toBeTruthy();
 
-    fireEvent.press(screen.getByLabelText("Add Griha Pravesh Kit"));
-
-    expect(screen.getByText(/1 Item/)).toBeTruthy();
-    expect(screen.getByText(/₹699/)).toBeTruthy();
-    expect(screen.getByLabelText("Cart, 1 items")).toBeTruthy();
-    expect(screen.getByLabelText("View cart")).toBeTruthy();
+    expect(screen.getByLabelText("Add Griha Pravesh Kit to cart")).toBeTruthy();
+    expect(screen.getByLabelText("Cart, 0 items")).toBeTruthy();
   });
 });

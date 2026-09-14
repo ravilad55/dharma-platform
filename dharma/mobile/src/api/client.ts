@@ -3,6 +3,8 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { getApiBaseUrl } from "./config";
 import { clearRefreshMaterial, readRefreshMaterial, writeRefreshMaterial } from "../auth/storage";
 import type { AuthSession } from "../auth/types";
+import { deviceId } from "../auth/device";
+import { notifySessionExpired } from "../auth/sessionEvents";
 
 const api = axios.create({
   baseURL: getApiBaseUrl(),
@@ -25,8 +27,18 @@ export function clearAccessToken() {
 }
 
 export async function refreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = performRefreshAccessToken().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+}
+
+async function performRefreshAccessToken(): Promise<string | null> {
   const material = await readRefreshMaterial();
+  logDevelopment("refresh material", { accessTokenPresent: Boolean(accessToken), refreshTokenPresent: Boolean(material?.refreshToken) });
   if (!material) {
+    notifySessionExpired();
     return null;
   }
 
@@ -34,18 +46,26 @@ export async function refreshAccessToken(): Promise<string | null> {
     const baseURL = getApiBaseUrl();
     const response = await axios.post<AuthSession>(
       `${baseURL}/auth/refresh`,
-      material,
+      { refreshToken: material.refreshToken, deviceId },
       { headers: { "Content-Type": "application/json" } }
     );
 
+    logDevelopment("refresh response", { status: response.status });
     await writeRefreshMaterial(response.data.refreshToken, response.data.sessionId);
     setAccessToken(response.data.accessToken);
     return response.data.accessToken;
-  } catch {
+  } catch (error) {
+    const axiosError = error as AxiosError<{ type?: string; title?: string; detail?: string; code?: string }>;
+    logDevelopment("refresh failure", { status: axiosError.response?.status, type: axiosError.response?.data?.type, title: axiosError.response?.data?.title, detail: axiosError.response?.data?.detail, code: axiosError.response?.data?.code });
     await clearRefreshMaterial();
     clearAccessToken();
+    notifySessionExpired();
     return null;
   }
+}
+
+function logDevelopment(message: string, details: Record<string, unknown>) {
+  if (typeof __DEV__ !== "undefined" && __DEV__) console.warn(`[Dharma auth] ${message}`, details);
 }
 
 api.interceptors.request.use((config) => {

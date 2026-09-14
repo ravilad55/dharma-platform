@@ -175,6 +175,7 @@ public sealed class AuthService(
             ?? throw new AuthException("refresh_concurrent", 409, "The session refresh is already being processed.");
 
         AuthSession? result = null;
+        AuthException? reuseException = null;
         await transactionBoundary.ExecuteAsync(async ct =>
         {
             var node = await store.GetRefreshTokenAsync(hash, ct);
@@ -186,7 +187,11 @@ public sealed class AuthService(
 
             if (!node.IsUsable(clock.GetUtcNow()))
             {
-                foreach (var familyNode in await store.GetFamilyTokensAsync(node.FamilyId, ct)) familyNode.Revoke(clock.GetUtcNow());
+                foreach (var familyNode in await store.GetFamilyTokensAsync(node.FamilyId, ct))
+                {
+                    familyNode.Revoke(clock.GetUtcNow());
+                    await store.SaveRefreshTokenAsync(familyNode, ct);
+                }
                 session.Revoke(true);
                 await store.SaveSessionAsync(session, ct);
                 await auditPublisher.PublishAsync(new AuthAuditEvent
@@ -197,7 +202,8 @@ public sealed class AuthService(
                     Outcome = "SecurityRevoked",
                     CorrelationId = Guid.NewGuid().ToString()
                 }, ct);
-                throw new AuthException("refresh_reuse_detected", 401, "The session is no longer valid.");
+                reuseException = new AuthException("refresh_reuse_detected", 401, "The session is no longer valid.");
+                return;
             }
 
             node.Consume(clock.GetUtcNow());
@@ -218,6 +224,7 @@ public sealed class AuthService(
             }, ct);
         }, cancellationToken);
 
+        if (reuseException is not null) throw reuseException;
         return result!;
     }
 

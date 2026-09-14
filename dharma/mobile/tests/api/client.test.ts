@@ -2,6 +2,7 @@ import axios from "axios";
 import { clearAccessToken, getAccessToken, refreshAccessToken, setAccessToken } from "../../src/api/client";
 import * as storage from "../../src/auth/storage";
 import type { AuthSession } from "../../src/auth/types";
+import { deviceId } from "../../src/auth/device";
 
 jest.mock("axios", () => {
   const actual = jest.requireActual("axios");
@@ -65,6 +66,11 @@ describe("Axios API Client & Refresh Coordinator", () => {
       expect(token).toBe("new-access-token-999");
       expect(getAccessToken()).toBe("new-access-token-999");
       expect(writeSpy).toHaveBeenCalledWith("new-refresh-token-888", "s-1");
+      expect(axios.post).toHaveBeenCalledWith(
+        expect.stringContaining("/auth/refresh"),
+        { refreshToken: "current-refresh-token", deviceId },
+        expect.any(Object),
+      );
     });
 
     it("clears storage and access token if refresh fails (e.g. 401 revoked)", async () => {

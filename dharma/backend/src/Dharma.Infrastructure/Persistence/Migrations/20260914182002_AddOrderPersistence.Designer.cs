@@ -4,6 +4,7 @@ using Dharma.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dharma.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DharmaDbContext))]
-    partial class DharmaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260914182002_AddOrderPersistence")]
+    partial class AddOrderPersistence
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,89 +153,6 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                     b.HasIndex("ShopId", "Status");
 
                     b.ToTable("carts", (string)null);
-                });
-
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.CustomerAddressRecord", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("AddressLine1")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
-
-                    b.Property<string>("AddressLine2")
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("ContactName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("ContactPhone")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("varchar(2)");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid?>("DefaultForCustomerId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<decimal?>("Latitude")
-                        .HasPrecision(9, 6)
-                        .HasColumnType("decimal(9,6)");
-
-                    b.Property<decimal?>("Longitude")
-                        .HasPrecision(9, 6)
-                        .HasColumnType("decimal(9,6)");
-
-                    b.Property<string>("PostalCode")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<DateTimeOffset>("UpdatedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DefaultForCustomerId")
-                        .IsUnique();
-
-                    b.HasIndex("CustomerId", "IsDefault", "CreatedAtUtc");
-
-                    b.ToTable("customer_addresses", (string)null);
                 });
 
             modelBuilder.Entity("Dharma.Infrastructure.Persistence.IdentityCustomerProfileRecord", b =>
@@ -537,41 +457,6 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("order_addresses", (string)null);
-                });
-
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.OrderIdempotencyRecord", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("varchar(250)");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("RequestFingerprint")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("varchar(64)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("CustomerId", "Key")
-                        .IsUnique();
-
-                    b.ToTable("order_idempotency_records", (string)null);
                 });
 
             modelBuilder.Entity("Dharma.Infrastructure.Persistence.OrderItemRecord", b =>
@@ -920,15 +805,6 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.CustomerAddressRecord", b =>
-                {
-                    b.HasOne("Dharma.Infrastructure.Persistence.IdentityUserRecord", null)
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Dharma.Infrastructure.Persistence.IdentityCustomerProfileRecord", b =>
                 {
                     b.HasOne("Dharma.Infrastructure.Persistence.IdentityUserRecord", null)
@@ -977,21 +853,6 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Dharma.Infrastructure.Persistence.OrderIdempotencyRecord", b =>
-                {
-                    b.HasOne("Dharma.Infrastructure.Persistence.IdentityUserRecord", null)
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Dharma.Infrastructure.Persistence.OrderRecord", null)
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

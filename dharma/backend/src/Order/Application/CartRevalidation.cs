@@ -21,6 +21,7 @@ public interface IOrderCartRevalidationStore
 public interface IOrderCartRevalidationService
 {
     Task<RevalidatedCart> RevalidateAsync(Guid customerId, CancellationToken cancellationToken = default);
+    Task<RevalidatedCart> RevalidateUnderCartLockAsync(Guid customerId, CancellationToken cancellationToken = default);
 }
 
 public sealed class OrderCartRevalidationService(IOrderCartRevalidationStore store, IDistributedLock distributedLock) : IOrderCartRevalidationService
@@ -30,6 +31,12 @@ public sealed class OrderCartRevalidationService(IOrderCartRevalidationStore sto
         if (customerId == Guid.Empty) throw new ArgumentException("Customer is required.", nameof(customerId));
         await using var cartLock = await distributedLock.TryAcquireAsync($"cart:customer:{customerId}", TimeSpan.FromSeconds(10), cancellationToken)
             ?? throw new CartRevalidationException("cart_concurrent", "The cart is being updated. Please try again.");
+        return await RevalidateUnderCartLockAsync(customerId, cancellationToken);
+    }
+
+    public async Task<RevalidatedCart> RevalidateUnderCartLockAsync(Guid customerId, CancellationToken cancellationToken = default)
+    {
+        if (customerId == Guid.Empty) throw new ArgumentException("Customer is required.", nameof(customerId));
         var cart = await store.GetAsync(customerId, cancellationToken) ?? throw new CartRevalidationException("cart_not_found", "The cart was not found.");
         if (cart.Items.Count == 0) throw new CartRevalidationException("cart_empty", "The cart is empty.");
         if (!string.Equals(cart.Currency, "INR", StringComparison.Ordinal)) throw new CartRevalidationException("cart_currency_invalid", "The cart currency is invalid.");

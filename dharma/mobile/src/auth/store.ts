@@ -9,6 +9,8 @@ import {
   writeRefreshMaterial,
 } from "./storage";
 import type { AuthSession, AuthUser, OtpRequestResult } from "./types";
+import { deviceId } from "./device";
+import { setSessionExpiredHandler } from "./sessionEvents";
 
 type AuthStatus = "bootstrapping" | "unauthenticated" | "authenticated";
 
@@ -26,8 +28,6 @@ type AuthState = {
   logout: () => Promise<void>;
   reset: () => void;
 };
-
-const deviceId = "customer-mobile-device";
 
 function applySession(session: AuthSession) {
   setAccessToken(session.accessToken);
@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     try {
-      const response = await api.post<AuthSession>("/auth/refresh", material);
+      const response = await api.post<AuthSession>("/auth/refresh", { refreshToken: material.refreshToken, deviceId });
       const sessionState = applySession(response.data);
       const currentUser = await api.get<AuthUser>("/auth/me");
       set({ ...sessionState, user: currentUser.data, onboardingCompleted: true });
@@ -112,3 +112,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ status: "unauthenticated", user: null, challenge: null, phoneNumber: "" });
   },
 }));
+
+setSessionExpiredHandler(() => {
+  clearAccessToken();
+  void clearRefreshMaterial();
+  useAuthStore.setState({ status: "unauthenticated", user: null, challenge: null, phoneNumber: "" });
+});

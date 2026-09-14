@@ -18,6 +18,14 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
     public DbSet<PoojaShopRecord> PoojaShops => Set<PoojaShopRecord>();
     public DbSet<ProductCategoryRecord> ProductCategories => Set<ProductCategoryRecord>();
     public DbSet<ProductRecord> Products => Set<ProductRecord>();
+        public DbSet<CartRecord> Carts => Set<CartRecord>();
+        public DbSet<CartItemRecord> CartItems => Set<CartItemRecord>();
+        public DbSet<OrderRecord> Orders => Set<OrderRecord>();
+        public DbSet<OrderItemRecord> OrderItems => Set<OrderItemRecord>();
+        public DbSet<OrderAddressRecord> OrderAddresses => Set<OrderAddressRecord>();
+        public DbSet<OrderStatusHistoryRecord> OrderStatusHistory => Set<OrderStatusHistoryRecord>();
+        public DbSet<CustomerAddressRecord> CustomerAddresses => Set<CustomerAddressRecord>();
+        public DbSet<OrderIdempotencyRecord> OrderIdempotencyRecords => Set<OrderIdempotencyRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,6 +37,123 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
             entity.Property(message => message.Payload).IsRequired();
             entity.Property(message => message.IdempotencyKey).HasMaxLength(250);
             entity.HasIndex(message => new { message.PublishedAt, message.OccurredAt });
+        });
+
+        modelBuilder.Entity<CartRecord>(entity =>
+        {
+            entity.ToTable("carts");
+            entity.HasKey(cart => cart.Id);
+            entity.Property(cart => cart.Currency).HasMaxLength(3).IsRequired();
+            entity.HasIndex(cart => cart.CustomerId).IsUnique();
+            entity.HasIndex(cart => new { cart.ShopId, cart.Status });
+            entity.HasOne<IdentityUserRecord>().WithMany().HasForeignKey(cart => cart.CustomerId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<PoojaShopRecord>().WithMany().HasForeignKey(cart => cart.ShopId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CartItemRecord>(entity =>
+        {
+            entity.ToTable("cart_items");
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.UnitPrice).HasPrecision(18, 2);
+            entity.Property(item => item.Currency).HasMaxLength(3).IsRequired();
+            entity.HasIndex(item => new { item.CartId, item.ProductId }).IsUnique();
+            entity.HasIndex(item => item.CartId);
+            entity.HasOne<CartRecord>().WithMany().HasForeignKey(item => item.CartId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<ProductRecord>().WithMany().HasForeignKey(item => item.ProductId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<OrderRecord>(entity =>
+        {
+            entity.ToTable("orders");
+            entity.HasKey(order => order.Id);
+            entity.Property(order => order.OrderNumber).HasMaxLength(32).IsRequired();
+            entity.Property(order => order.Currency).HasMaxLength(3).IsRequired();
+            entity.Property(order => order.Subtotal).HasPrecision(18, 2);
+            entity.Property(order => order.TaxAmount).HasPrecision(18, 2);
+            entity.Property(order => order.DiscountAmount).HasPrecision(18, 2);
+            entity.Property(order => order.DeliveryFee).HasPrecision(18, 2);
+            entity.Property(order => order.TotalAmount).HasPrecision(18, 2);
+            entity.HasIndex(order => order.OrderNumber).IsUnique();
+            entity.HasIndex(order => new { order.CustomerId, order.Status, order.CreatedAtUtc });
+            entity.HasIndex(order => new { order.ShopId, order.Status, order.CreatedAtUtc });
+            entity.HasOne<IdentityUserRecord>().WithMany().HasForeignKey(order => order.CustomerId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<PoojaShopRecord>().WithMany().HasForeignKey(order => order.ShopId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<OrderItemRecord>(entity =>
+        {
+            entity.ToTable("order_items", table => table.HasCheckConstraint("CK_order_items_quantity_positive", "Quantity > 0"));
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.ProductNameSnapshot).HasMaxLength(200).IsRequired();
+            entity.Property(item => item.SkuSnapshot).HasMaxLength(100).IsRequired();
+            entity.Property(item => item.Currency).HasMaxLength(3).IsRequired();
+            entity.Property(item => item.UnitPrice).HasPrecision(18, 2);
+            entity.Property(item => item.TaxAmount).HasPrecision(18, 2);
+            entity.Property(item => item.DiscountAmount).HasPrecision(18, 2);
+            entity.Property(item => item.LineTotal).HasPrecision(18, 2);
+            entity.HasIndex(item => item.OrderId);
+            entity.HasIndex(item => item.ProductId);
+            entity.HasOne<OrderRecord>().WithMany().HasForeignKey(item => item.OrderId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<ProductRecord>().WithMany().HasForeignKey(item => item.ProductId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<OrderAddressRecord>(entity =>
+        {
+            entity.ToTable("order_addresses");
+            entity.HasKey(address => address.Id);
+            entity.Property(address => address.ContactName).HasMaxLength(200).IsRequired();
+            entity.Property(address => address.ContactPhone).HasMaxLength(32).IsRequired();
+            entity.Property(address => address.AddressLine1).HasMaxLength(300).IsRequired();
+            entity.Property(address => address.AddressLine2).HasMaxLength(300);
+            entity.Property(address => address.City).HasMaxLength(100).IsRequired();
+            entity.Property(address => address.State).HasMaxLength(100).IsRequired();
+            entity.Property(address => address.PostalCode).HasMaxLength(20).IsRequired();
+            entity.Property(address => address.Country).HasMaxLength(2).IsRequired();
+            entity.Property(address => address.Latitude).HasPrecision(9, 6);
+            entity.Property(address => address.Longitude).HasPrecision(9, 6);
+            entity.HasIndex(address => address.OrderId).IsUnique();
+            entity.HasOne<OrderRecord>().WithMany().HasForeignKey(address => address.OrderId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OrderStatusHistoryRecord>(entity =>
+        {
+            entity.ToTable("order_status_history");
+            entity.HasKey(history => history.Id);
+            entity.Property(history => history.Actor).HasMaxLength(100).IsRequired();
+            entity.Property(history => history.Reason).HasMaxLength(1000);
+            entity.HasIndex(history => new { history.OrderId, history.CreatedAtUtc });
+            entity.HasOne<OrderRecord>().WithMany().HasForeignKey(history => history.OrderId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CustomerAddressRecord>(entity =>
+        {
+            entity.ToTable("customer_addresses");
+            entity.HasKey(address => address.Id);
+            entity.Property(address => address.Label).HasMaxLength(100).IsRequired();
+            entity.Property(address => address.ContactName).HasMaxLength(200).IsRequired();
+            entity.Property(address => address.ContactPhone).HasMaxLength(32).IsRequired();
+            entity.Property(address => address.AddressLine1).HasMaxLength(300).IsRequired();
+            entity.Property(address => address.AddressLine2).HasMaxLength(300);
+            entity.Property(address => address.City).HasMaxLength(100).IsRequired();
+            entity.Property(address => address.State).HasMaxLength(100).IsRequired();
+            entity.Property(address => address.PostalCode).HasMaxLength(20).IsRequired();
+            entity.Property(address => address.Country).HasMaxLength(2).IsRequired();
+            entity.Property(address => address.Latitude).HasPrecision(9, 6);
+            entity.Property(address => address.Longitude).HasPrecision(9, 6);
+            entity.HasIndex(address => new { address.CustomerId, address.IsDefault, address.CreatedAtUtc });
+            entity.HasIndex(address => address.DefaultForCustomerId).IsUnique();
+            entity.HasOne<IdentityUserRecord>().WithMany().HasForeignKey(address => address.CustomerId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<OrderIdempotencyRecord>(entity =>
+        {
+            entity.ToTable("order_idempotency_records");
+            entity.HasKey(record => record.Id);
+            entity.Property(record => record.Key).HasMaxLength(250).IsRequired();
+            entity.Property(record => record.RequestFingerprint).HasMaxLength(64).IsRequired();
+            entity.HasIndex(record => new { record.CustomerId, record.Key }).IsUnique();
+            entity.HasOne<IdentityUserRecord>().WithMany().HasForeignKey(record => record.CustomerId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<OrderRecord>().WithMany().HasForeignKey(record => record.OrderId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<InboxRecord>(entity =>

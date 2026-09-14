@@ -11,9 +11,11 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { addCartItem, Cart, getCart, removeCartItem, updateCartItem } from "../../src/api/cart";
 import { getCategories, getProducts, Product } from "../../src/api/catalog";
+import { getErrorMessage } from "../../src/api/errors";
 import { borderRadius, colors, DharmaSearchBar, shadows, spacing } from "../../src/design-system";
 import { getLocalProductImage } from "../../src/features/samagri/productImages";
 
@@ -27,7 +29,7 @@ function ProductImage({ imageReference }: { imageReference?: string | null }) {
   return <View style={styles.imagePlaceholder}><Text style={styles.imagePlaceholderText}>Dharma</Text><Text style={styles.imagePlaceholderSubtext}>Pooja Samagri</Text></View>;
 }
 
-function ProductCard({ product, index, quantity, onChangeQuantity }: { product: Product; index: number; quantity: number; onChangeQuantity: (change: number) => void }) {
+function ProductCard({ product, index, quantity, onAdd, onChangeQuantity, disabled }: { product: Product; index: number; quantity: number; onAdd: () => void; onChangeQuantity: (change: number) => void; disabled: boolean }) {
   return (
     <View style={styles.card}>
       <View style={styles.imageFrame}>
@@ -47,11 +49,11 @@ function ProductCard({ product, index, quantity, onChangeQuantity }: { product: 
             <Text style={styles.price}>{product.currency === "INR" ? "\u20B9" : `${product.currency} `}{product.price}</Text>
             {product.isAvailable ? <Text style={styles.stock}>In Stock</Text> : <Text style={styles.unavailable}>Out of Stock</Text>}
           </View>
-          <View style={styles.stepper}>
-            <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${product.name}`} onPress={() => onChangeQuantity(-1)} style={styles.stepperAction}><Text style={styles.stepperButton}>-</Text></Pressable>
+          {quantity === 0 ? <Pressable accessibilityRole="button" accessibilityLabel={`Add ${product.name} to cart`} onPress={onAdd} disabled={disabled} style={styles.addButton}><Text style={styles.addButtonText}>Add to Cart</Text></Pressable> : <View style={styles.stepper}>
+            <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${product.name}`} onPress={() => onChangeQuantity(-1)} disabled={disabled} style={styles.stepperAction}><Text style={styles.stepperButton}>-</Text></Pressable>
             <Text style={styles.quantity}>{quantity}</Text>
-            <Pressable accessibilityRole="button" accessibilityLabel={`Add ${product.name}`} onPress={() => onChangeQuantity(1)} style={styles.stepperAction}><Text style={styles.stepperButton}>+</Text></Pressable>
-          </View>
+            <Pressable accessibilityRole="button" accessibilityLabel={`Add ${product.name}`} onPress={() => onChangeQuantity(1)} disabled={disabled} style={styles.stepperAction}><Text style={styles.stepperButton}>+</Text></Pressable>
+          </View>}
         </View>
       </View>
     </View>
@@ -60,13 +62,15 @@ function ProductCard({ product, index, quantity, onChangeQuantity }: { product: 
 
 export default function SamagriScreen() {
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<string>();
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
   const categories = useQuery({ queryKey: ["product-categories"], queryFn: getCategories });
   const products = useQuery({ queryKey: ["products", categoryId, search], queryFn: () => getProducts({ categoryId, search: search.trim() || undefined }) });
-  const itemCount = Object.values(quantities).reduce((total, quantity) => total + quantity, 0);
-  const cartTotal = products.data?.items.reduce((total, product) => total + product.price * (quantities[product.id] ?? 0), 0) ?? 0;
+  const cart = useQuery({ queryKey: ["cart"], queryFn: getCart });
+  const cartMutation = useMutation({ mutationFn: ({ productId, itemId, quantity }: { productId: string; itemId?: string; quantity: number }) => quantity <= 0 ? removeCartItem(itemId!) : itemId ? updateCartItem(itemId, quantity) : addCartItem(productId, quantity), onSuccess: (data: Cart) => queryClient.setQueryData(["cart"], data) });
+  const itemCount = cart.data?.itemCount ?? 0;
+  const cartTotal = cart.data?.total ?? 0;
   const listBottomPadding = itemCount > 0 ? CART_BAR_HEIGHT + insets.bottom + spacing.lg : spacing.lg;
   const categoryItems = categories.data?.length ? categories.data.map((category) => ({ id: category.id, name: category.name })) : categoryLabels.map((name) => ({ id: name, name }));
 
@@ -76,7 +80,7 @@ export default function SamagriScreen() {
         <View style={styles.header}>
           <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} hitSlop={10} style={styles.headerButton}><Text style={styles.back}>‹</Text></Pressable>
           <Text style={styles.title}>Pooja Samagri</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel={`Cart, ${itemCount} items`} onPress={() => {}} hitSlop={8} style={styles.cartButton}><Text style={styles.cartIcon}>🛒</Text>{itemCount > 0 ? <View style={styles.cartBadge}><Text style={styles.cartBadgeText}>{itemCount}</Text></View> : null}</Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel={`Cart, ${itemCount} items`} onPress={() => router.push("/(protected)/cart")} hitSlop={8} style={styles.cartButton}><Text style={styles.cartIcon}>🛒</Text>{itemCount > 0 ? <View style={styles.cartBadge}><Text style={styles.cartBadgeText}>{itemCount}</Text></View> : null}</Pressable>
         </View>
         <DharmaSearchBar value={search} onChangeText={setSearch} placeholder="Search items..." onMicPress={() => {}} style={styles.search} />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips} style={styles.categoryScroll}>
@@ -86,12 +90,13 @@ export default function SamagriScreen() {
         {products.isLoading ? <View style={styles.state}><ActivityIndicator color={colors.primary} /></View> : products.isError ? <View style={styles.state}><Text style={styles.stateText}>Products could not be loaded.</Text><Pressable onPress={() => products.refetch()}><Text style={styles.retry}>Retry</Text></Pressable></View> : <FlatList
           data={products.data?.items ?? []}
           keyExtractor={(product) => product.id}
-          renderItem={({ item, index }) => <ProductCard product={item} index={index} quantity={quantities[item.id] ?? 0} onChangeQuantity={(change) => setQuantities((current) => ({ ...current, [item.id]: Math.max(0, (current[item.id] ?? 0) + change) }))} />}
+          renderItem={({ item, index }) => { const cartItem = cart.data?.items.find((entry) => entry.productId === item.id); const quantity = cartItem?.quantity ?? 0; return <ProductCard product={item} index={index} quantity={quantity} disabled={cartMutation.isPending} onAdd={() => cartMutation.mutate({ productId: item.id, quantity: 1 })} onChangeQuantity={(change) => cartItem && cartMutation.mutate({ productId: item.id, itemId: cartItem.id, quantity: quantity + change })} />; }}
           contentContainerStyle={[styles.list, { paddingBottom: listBottomPadding }]}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={<View style={styles.state}><Text style={styles.stateText}>No products match your search.</Text></View>}
         />}
-        {itemCount > 0 ? <View style={[styles.cartBar, { bottom: Math.max(insets.bottom, spacing.sm) }]}><Text style={styles.cartBarIcon}>🛒</Text><Text style={styles.cartSummary}>{itemCount} {itemCount === 1 ? "Item" : "Items"}  •  \u20B9{cartTotal.toLocaleString("en-IN")}</Text><Pressable accessibilityRole="button" accessibilityLabel="View cart" style={styles.viewCart}><Text style={styles.viewCartText}>View Cart  →</Text></Pressable></View> : null}
+        {cartMutation.isError ? <Text style={styles.cartError}>{getErrorMessage(cartMutation.error, "Unable to update your cart.")}</Text> : null}
+        {itemCount > 0 ? <View style={[styles.cartBar, { bottom: Math.max(insets.bottom, spacing.sm) }]}><Text style={styles.cartBarIcon}>🛒</Text><Text style={styles.cartSummary}>{itemCount} {itemCount === 1 ? "Item" : "Items"}  •  \u20B9{cartTotal.toLocaleString("en-IN")}</Text><Pressable accessibilityRole="button" accessibilityLabel="View cart" onPress={() => router.push("/(protected)/cart")} style={styles.viewCart}><Text style={styles.viewCartText}>View Cart  →</Text></Pressable></View> : null}
       </View>
     </SafeAreaView>
   );
@@ -142,6 +147,8 @@ const styles = StyleSheet.create({
   stepperAction: { width: 40, height: 42, alignItems: "center", justifyContent: "center" },
   stepperButton: { color: colors.primary, fontSize: 25, lineHeight: 28 },
   quantity: { color: colors.text, fontSize: 18, fontWeight: "700" },
+  addButton: { minWidth: 130, height: 44, alignItems: "center", justifyContent: "center", borderRadius: borderRadius.full, backgroundColor: colors.primary, paddingHorizontal: spacing.sm },
+  addButtonText: { color: colors.white, fontSize: 13, fontWeight: "800" },
   state: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.xl },
   stateText: { color: colors.textMuted },
   retry: { color: colors.primary, fontWeight: "700", marginTop: spacing.sm },
@@ -150,4 +157,5 @@ const styles = StyleSheet.create({
   cartSummary: { flex: 1, color: colors.white, fontSize: 17, fontWeight: "800" },
   viewCart: { borderWidth: 1.5, borderColor: colors.white, borderRadius: borderRadius.full, paddingHorizontal: spacing.md, paddingVertical: 11 },
   viewCartText: { color: colors.white, fontSize: 15, fontWeight: "800" },
+  cartError: { color: colors.error, textAlign: "center", paddingVertical: spacing.xs },
 });

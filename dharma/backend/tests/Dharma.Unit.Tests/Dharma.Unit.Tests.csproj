@@ -28,6 +28,8 @@
     <ProjectReference Include="..\..\src\Identity\Domain\Dharma.Identity.Domain.csproj" />
     <ProjectReference Include="..\..\src\Identity\Application\Dharma.Identity.Application.csproj" />
     <ProjectReference Include="..\..\src\Identity\Infrastructure\Dharma.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Order\Domain\Dharma.Order.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Order\Application\Dharma.Order.Application.csproj" />
   </ItemGroup>
 
 </Project>
