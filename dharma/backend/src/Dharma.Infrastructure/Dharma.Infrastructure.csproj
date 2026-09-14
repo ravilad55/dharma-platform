@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Dharma.Shared\Dharma.Shared.csproj" />
     <ProjectReference Include="..\Identity\Infrastructure\Dharma.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="..\PoojaSamagri\Application\Dharma.PoojaSamagri.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

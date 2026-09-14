@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EA4082C3-0AF2-44A0-B615-CCF7DB81F595}|src\\Dharma.Api\\Dharma.Api.csproj|c:\\data\\testprojects\\dharma-platform\\dharma\\backend\\src\\dharma.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{EA4082C3-0AF2-44A0-B615-CCF7DB81F595}|src\\Dharma.Api\\Dharma.Api.csproj|solutionrelative:src\\dharma.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{EA4082C3-0AF2-44A0-B615-CCF7DB81F595}|src\\Dharma.Api\\Dharma.Api.csproj|c:\\data\\testprojects\\dharma-platform\\dharma\\backend\\src\\dharma.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{EA4082C3-0AF2-44A0-B615-CCF7DB81F595}|src\\Dharma.Api\\Dharma.Api.csproj|solutionrelative:src\\dharma.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{009B25EE-8490-4A34-9E67-82D28A5DD0B8}|src\\Identity\\Application\\Dharma.Identity.Application.csproj|c:\\data\\testprojects\\dharma-platform\\dharma\\backend\\src\\identity\\application\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{009B25EE-8490-4A34-9E67-82D28A5DD0B8}|src\\Identity\\Application\\Dharma.Identity.Application.csproj|solutionrelative:src\\identity\\application\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA4082C3-0AF2-44A0-B615-CCF7DB81F595}|src\\Dharma.Api\\Dharma.Api.csproj|c:\\data\\testprojects\\dharma-platform\\dharma\\backend\\src\\dharma.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA4082C3-0AF2-44A0-B615-CCF7DB81F595}|src\\Dharma.Api\\Dharma.Api.csproj|solutionrelative:src\\dharma.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EA4082C3-0AF2-44A0-B615-CCF7DB81F595}|src\\Dharma.Api\\Dharma.Api.csproj|c:\\data\\testprojects\\dharma-platform\\dharma\\backend\\src\\dharma.api\\dharma.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
@@ -37,7 +41,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -45,7 +49,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\src\\Identity\\Application\\AuthService.cs",
+              "RelativeDocumentMoniker": "src\\Identity\\Application\\AuthService.cs",
+              "ToolTip": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\src\\Identity\\Application\\AuthService.cs",
+              "RelativeToolTip": "src\\Identity\\Application\\AuthService.cs",
+              "ViewState": "AgIAAEoAAAAAAAAAAAArwFcAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-13T17:11:56.672Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\src\\Dharma.Api\\Program.cs",
               "RelativeDocumentMoniker": "src\\Dharma.Api\\Program.cs",
@@ -53,25 +69,24 @@
               "RelativeToolTip": "src\\Dharma.Api\\Program.cs",
               "ViewState": "AgIAABMAAAAAAAAAAAAwwCMAAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-13T17:08:34.748Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-13T17:08:34.748Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\src\\Dharma.Api\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "src\\Dharma.Api\\Controllers\\AuthController.cs",
               "ToolTip": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\src\\Dharma.Api\\Controllers\\AuthController.cs",
               "RelativeToolTip": "src\\Dharma.Api\\Controllers\\AuthController.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAApwBgAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAnwFIAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-13T15:39:46.832Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Dharma.Api.csproj",
               "DocumentMoniker": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\src\\Dharma.Api\\Dharma.Api.csproj",
               "RelativeDocumentMoniker": "src\\Dharma.Api\\Dharma.Api.csproj",
@@ -79,12 +94,11 @@
               "RelativeToolTip": "src\\Dharma.Api\\Dharma.Api.csproj",
               "ViewState": "AgIAABAAAAAAAAAAAAAowCEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-09-13T13:16:26.545Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-13T13:16:26.545Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Dharma.Infrastructure.csproj",
               "DocumentMoniker": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\src\\Dharma.Infrastructure\\Dharma.Infrastructure.csproj",
               "RelativeDocumentMoniker": "src\\Dharma.Infrastructure\\Dharma.Infrastructure.csproj",
@@ -92,12 +106,11 @@
               "RelativeToolTip": "src\\Dharma.Infrastructure\\Dharma.Infrastructure.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-09-13T13:16:25.569Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-13T13:16:25.569Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Dharma.Identity.Infrastructure.csproj",
               "DocumentMoniker": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\src\\Identity\\Infrastructure\\Dharma.Identity.Infrastructure.csproj",
               "RelativeDocumentMoniker": "src\\Identity\\Infrastructure\\Dharma.Identity.Infrastructure.csproj",
@@ -105,12 +118,11 @@
               "RelativeToolTip": "src\\Identity\\Infrastructure\\Dharma.Identity.Infrastructure.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-09-13T13:16:24.064Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-13T13:16:24.064Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "DharmaDbContextModelSnapshot.cs",
               "DocumentMoniker": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\backend\\src\\Dharma.Infrastructure\\Persistence\\Migrations\\DharmaDbContextModelSnapshot.cs",
               "RelativeDocumentMoniker": "src\\Dharma.Infrastructure\\Persistence\\Migrations\\DharmaDbContextModelSnapshot.cs",
@@ -122,7 +134,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "slice-1-validation.md",
               "DocumentMoniker": "C:\\Data\\TestProjects\\dharma-platform\\dharma\\docs\\development\\slice-1-validation.md",
               "RelativeDocumentMoniker": "..\\docs\\development\\slice-1-validation.md",

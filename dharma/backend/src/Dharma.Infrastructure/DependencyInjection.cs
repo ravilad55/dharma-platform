@@ -3,6 +3,7 @@ using Dharma.Infrastructure.Persistence;
 using Dharma.Infrastructure.Redis;
 using Dharma.Identity.Application;
 using Dharma.Identity.Infrastructure;
+using Dharma.PoojaSamagri.Application;
 using Dharma.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@ public static class DependencyInjection
     public static IServiceCollection AddDharmaInfrastructure(this IServiceCollection services, IConfiguration configuration, Microsoft.Extensions.Hosting.IHostEnvironment environment)
     {
         services.AddIdentityInfrastructure(configuration, environment);
+        services.AddScoped<ICatalogQueryService, PoojaSamagriCatalogQueryService>();
         var connectionString = configuration.GetConnectionString("Default");
         if (!string.IsNullOrWhiteSpace(connectionString))
         {

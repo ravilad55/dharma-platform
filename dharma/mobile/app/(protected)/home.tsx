@@ -55,6 +55,11 @@ export default function HomeScreen() {
   };
 
   const handleSelectService = (serviceId: ServiceCardItem["id"]) => {
+    if (serviceId === "samagri") {
+      router.push("/(protected)/samagri");
+      return;
+    }
+
     const titles: Record<ServiceCardItem["id"], string> = {
       pandits: "Pandit Booking",
       samagri: "Pooja Samagri Store",

@@ -15,6 +15,9 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
     public DbSet<IdentityRoleRecord> IdentityRoles => Set<IdentityRoleRecord>();
     public DbSet<IdentityUserRoleRecord> IdentityUserRoles => Set<IdentityUserRoleRecord>();
     public DbSet<AuthAuditEventRecord> AuthAuditEvents => Set<AuthAuditEventRecord>();
+    public DbSet<PoojaShopRecord> PoojaShops => Set<PoojaShopRecord>();
+    public DbSet<ProductCategoryRecord> ProductCategories => Set<ProductCategoryRecord>();
+    public DbSet<ProductRecord> Products => Set<ProductRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -90,6 +93,7 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
             entity.ToTable("roles");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Code).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.Description).HasMaxLength(200);
             entity.HasIndex(x => x.Code).IsUnique();
         });
 
@@ -107,11 +111,48 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
             entity.HasKey(x => x.Id);
             entity.Property(x => x.EventType).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Outcome).HasMaxLength(50).IsRequired();
+            entity.Property(x => x.Reason).HasMaxLength(100);
             entity.Property(x => x.CorrelationId).HasMaxLength(100).IsRequired();
             entity.Property(x => x.SafeMetadata).HasMaxLength(1000);
             entity.HasIndex(x => new { x.UserId, x.OccurredAt });
             entity.HasIndex(x => new { x.EventType, x.OccurredAt });
             entity.HasIndex(x => x.CorrelationId);
+        });
+
+        modelBuilder.Entity<PoojaShopRecord>(entity =>
+        {
+            entity.ToTable("pooja_shops");
+            entity.HasKey(shop => shop.Id);
+            entity.Property(shop => shop.Name).HasMaxLength(200).IsRequired();
+            entity.HasIndex(shop => shop.Name);
+            entity.HasIndex(shop => shop.OwnerUserId);
+            entity.HasOne<IdentityUserRecord>().WithMany().HasForeignKey(shop => shop.OwnerUserId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ProductCategoryRecord>(entity =>
+        {
+            entity.ToTable("product_categories");
+            entity.HasKey(category => category.Id);
+            entity.Property(category => category.Name).HasMaxLength(100).IsRequired();
+            entity.Property(category => category.Description).HasMaxLength(500);
+            entity.HasIndex(category => category.Name).IsUnique();
+            entity.HasIndex(category => new { category.IsActive, category.SortOrder });
+        });
+
+        modelBuilder.Entity<ProductRecord>(entity =>
+        {
+            entity.ToTable("products");
+            entity.HasKey(product => product.Id);
+            entity.Property(product => product.Name).HasMaxLength(200).IsRequired();
+            entity.Property(product => product.Description).HasMaxLength(2000);
+            entity.Property(product => product.Sku).HasMaxLength(100).IsRequired();
+            entity.Property(product => product.Currency).HasMaxLength(3).IsRequired();
+            entity.Property(product => product.ImageUrl).HasMaxLength(500);
+            entity.Property(product => product.Price).HasPrecision(18, 2);
+            entity.HasIndex(product => new { product.PoojaShopId, product.Sku }).IsUnique();
+            entity.HasIndex(product => new { product.CategoryId, product.IsActive, product.IsAvailable });
+            entity.HasOne(product => product.Shop).WithMany().HasForeignKey(product => product.PoojaShopId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(product => product.Category).WithMany().HasForeignKey(product => product.CategoryId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
@@ -131,4 +172,44 @@ public sealed class InboxRecord
     public Guid EventId { get; set; }
     public string Consumer { get; set; } = string.Empty;
     public DateTimeOffset ProcessedAt { get; set; }
+}
+
+public sealed class PoojaShopRecord
+{
+    public Guid Id { get; set; }
+    public Guid OwnerUserId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+public sealed class ProductCategoryRecord
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public int SortOrder { get; set; }
+    public bool IsActive { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+}
+
+public sealed class ProductRecord
+{
+    public Guid Id { get; set; }
+    public Guid PoojaShopId { get; set; }
+    public Guid CategoryId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public string Currency { get; set; } = "INR";
+    public string Sku { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public bool IsActive { get; set; }
+    public bool IsAvailable { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+    public PoojaShopRecord Shop { get; set; } = null!;
+    public ProductCategoryRecord Category { get; set; } = null!;
 }

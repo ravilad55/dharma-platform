@@ -1,6 +1,7 @@
 using Dharma.Api.Endpoints;
 using Dharma.Api.Middleware;
 using Dharma.Infrastructure;
+using Dharma.Infrastructure.Persistence;
 using Dharma.Identity.Application;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -102,6 +103,9 @@ builder.Services.AddHealthChecks();
 builder.Services.AddDharmaInfrastructure(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("Default")))
+    await app.Services.SeedDevelopmentCatalogAsync();
 
 if (app.Environment.IsDevelopment())
 {
