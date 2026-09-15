@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, router } from "expo-router";
 
 import { useAuthStore } from "../../src/auth/store";
+import { useTabNavigation } from "../../src/hooks/useTabNavigation";
 import {
   BottomTabBar,
   colors,
@@ -18,27 +19,17 @@ import {
   HomeGreeting,
   HomeHeader,
   ServiceCardItem,
-  TabName,
   UpcomingBooking,
 } from "../../src/design-system";
 
 export default function HomeScreen() {
+  const { activeTab, onTabPress: handleTabPress } = useTabNavigation("home");
   const status = useAuthStore((state) => state.status);
   const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
 
-  const [activeTab, setActiveTab] = useState<TabName>("home");
   const [searchQuery, setSearchQuery] = useState("");
+
   const location = "Thane, Maharashtra";
-
-  if (status === "unauthenticated") {
-    return <Redirect href="/(public)/login" />;
-  }
-
-  const handleLogout = async () => {
-    await logout();
-    router.replace("/(public)/login");
-  };
 
   const handleLocationPress = () => {
     const msg = "Location selector will be available in Slice 2.";
@@ -73,12 +64,9 @@ export default function HomeScreen() {
     }
   };
 
-  const handleTabPress = (tab: TabName) => {
-    setActiveTab(tab);
-    if (tab === "profile") {
-      void handleLogout();
-    }
-  };
+  if (status === "unauthenticated") {
+    return <Redirect href="/(public)/login" />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>

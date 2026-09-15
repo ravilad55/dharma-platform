@@ -10,6 +10,13 @@ export interface ApiProblemDetails {
   retryAfter?: number;
 }
 
+export function getErrorStatus(error: unknown): number | undefined {
+  if (error && typeof error === "object" && "isAxiosError" in error) {
+    return (error as AxiosError<ApiProblemDetails>).response?.status;
+  }
+  return undefined;
+}
+
 export function getErrorMessage(
   error: unknown,
   defaultMessage = "An unexpected error occurred. Please try again."
