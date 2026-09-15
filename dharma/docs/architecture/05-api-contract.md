@@ -72,12 +72,23 @@ Reservation and payment are distinct so the ten-minute hold is explicit. The fin
 | PUT | `/carts/{id}/items/{itemId}` | Customer | quantity -> cart |
 | DELETE | `/carts/{id}/items/{itemId}` | Customer | -> cart/204 |
 | POST | `/orders` | Customer | type, merchant, cart, address, payment request -> pending order/payment; idempotency required |
-| GET | `/orders` | Customer | type/status/cursor -> own orders |
-| GET | `/orders/{id}` | Customer/authorized partner/admin | -> order, items, payment and delivery summary |
+| GET | `/orders` | Customer | `page`/`pageSize` -> own orders newest first with summary DTOs; page size maximum 100; CUSTOMER JWT only |
+| GET | `/orders/{id}` | Customer | -> own order with immutable item and delivery-address snapshots; 404 for an unknown or unowned order |
 | POST | `/orders/{id}/cancel` | Customer | reason -> updated order subject to policy; idempotency |
 | POST | `/checkout` | Customer | cart ID, address ID, payment method reference -> server quote/order/payment state; idempotency required; 201/202 |
 
 Order item prices and names are server snapshots. Client totals are advisory.
+
+### Customer order history contract (ORDER-08)
+
+`GET /api/v1/orders` and `GET /api/v1/orders/{orderId}` are implemented in the Order module and require a `CUSTOMER` access token; anonymous calls return 401.
+
+- **Ownership.** The customer identity is taken only from the JWT `sub` claim. `customerId` is never accepted from the query string, body, or path, and both queries are customer-scoped in the persistence layer, so another customer's order is never loaded. An unknown order and another customer's order are indistinguishable: both return a generic 404 ProblemDetails that contains no order data.
+- **Pagination.** `GET /api/v1/orders` accepts `page` (default 1) and `pageSize` (default 20, maximum 100) and returns `{ items, page, pageSize, totalCount }`, the same envelope used by the catalog list endpoints. Invalid paging returns 400 ProblemDetails with code `orders_pagination_invalid`. Orders are ordered newest first by `createdAtUtc`.
+- **List DTO.** `items[]` exposes only `id`, `orderNumber`, `status`, `subtotal`, `deliveryCharge`, `serviceCharge`, `total`, `currency`, and `createdAtUtc`. No customer, shop, idempotency, or audit fields are exposed. `serviceCharge` is the residual component of the charged total (`total - subtotal - deliveryCharge`) and is `0` while orders charge only the product subtotal.
+- **Detail DTO.** `GET /api/v1/orders/{orderId}` returns the order header (`id`, `orderNumber`, `status`, `createdAtUtc`, `updatedAtUtc`, `subtotal`, `deliveryCharge`, `serviceCharge`, `total`, `currency`), `items[]` (`productId`, `productName`, `sku`, `quantity`, `unitPrice`, `taxAmount`, `discountAmount`, `lineTotal`, `currency`), and `address` (contact name/phone, address lines, city, state, postal code, country, latitude, longitude).
+- **Immutable snapshots.** Item names, SKUs, prices, tax, discounts, and line totals come from the order item snapshot written at order creation, and the delivery address comes from the immutable `order_addresses` snapshot. Later catalog or customer-address changes never alter an existing order response, and the live customer address is never returned.
+- **Status.** The stored order status is exposed as-is (newly created orders are `Pending`). These endpoints never mutate status and customers cannot change it.
 
 ## Delivery
 

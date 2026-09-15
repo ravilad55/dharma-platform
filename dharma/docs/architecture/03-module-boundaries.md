@@ -96,6 +96,14 @@ ORDER-07 must create immutable `OrderItem` data through `OrderProductSnapshotFac
 
 The idempotency record is unique by customer and key; replaying an identical request returns its original order, while a different request with the same key is rejected. Payment is not performed here. Only future server-side payment verification may transition `Pending` to `Confirmed`. Inventory reservation and decrement remain deferred to the Inventory slice.
 
+### Customer order history
+
+`GET /api/v1/orders` and `GET /api/v1/orders/{orderId}` are implemented by `OrderHistoryService` over `IOrderHistoryStore`; `EfOrderHistoryStore` performs the MySQL reads. API controllers only translate HTTP to the query and map failures to ProblemDetails, so no business or persistence logic sits in the controller.
+
+Every read is customer-scoped. The authenticated customer ID comes from the JWT `sub` claim and is never read from the request, so the store filters orders by `customerId` and optionally `orderId`. An unowned or unknown order is therefore never loaded and returns the same generic 404.
+
+The list endpoint projects only summary columns and uses the `(CustomerId, CreatedAtUtc)` index to page customer history ordered newest first without a filesort. Order details load the order, its item snapshots, and its immutable address snapshot with three customer-scoped queries, avoiding N+1 reads and never touching live catalog or customer-address rows. Both responses are built from the ORDER-03 and ORDER-05 snapshots only, so catalog or address changes never rewrite history. Status is read-only in this slice: `Pending` is exposed as stored, and no transition or payment behaviour is added.
+
 ## Payment
 
 - Responsibility: Stripe INR PaymentIntents, provider references, webhook verification, payment status, void/refund workflow, reconciliation.

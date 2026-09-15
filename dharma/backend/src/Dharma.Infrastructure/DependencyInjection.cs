@@ -27,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<IOrderCheckoutStore, EfOrderCheckoutStore>();
         services.AddScoped<IOrderAddressSnapshotSource, EfOrderCheckoutStore>();
         services.AddScoped<IOrderCheckoutService, OrderCheckoutService>();
+        services.AddScoped<IOrderHistoryStore, EfOrderHistoryStore>();
+        services.AddScoped<IOrderHistoryService, OrderHistoryService>();
         services.AddScoped<IAddressService, AddressService>();
         services.AddScoped<IAddressStore, EfAddressStore>();
         var connectionString = configuration.GetConnectionString("Default");

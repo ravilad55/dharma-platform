@@ -74,6 +74,7 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
             entity.Property(order => order.DeliveryFee).HasPrecision(18, 2);
             entity.Property(order => order.TotalAmount).HasPrecision(18, 2);
             entity.HasIndex(order => order.OrderNumber).IsUnique();
+            entity.HasIndex(order => new { order.CustomerId, order.CreatedAtUtc });
             entity.HasIndex(order => new { order.CustomerId, order.Status, order.CreatedAtUtc });
             entity.HasIndex(order => new { order.ShopId, order.Status, order.CreatedAtUtc });
             entity.HasOne<IdentityUserRecord>().WithMany().HasForeignKey(order => order.CustomerId).OnDelete(DeleteBehavior.Restrict);
