@@ -1,10 +1,12 @@
 import React from "react";
-import { render } from "@testing-library/react-native";
+import { fireEvent, render } from "@testing-library/react-native";
 
 import CartScreen from "../../app/(protected)/cart";
 
+const mockPush = jest.fn();
+
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn(), replace: jest.fn() },
+  router: { back: jest.fn(), replace: jest.fn(), push: (...args: unknown[]) => mockPush(...args) },
 }));
 
 jest.mock("react-native-safe-area-context", () => ({
@@ -35,6 +37,10 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 
 describe("Cart screen", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("renders server-derived item and price summary", () => {
     const screen = render(<CartScreen />);
 
@@ -45,5 +51,39 @@ describe("Cart screen", () => {
     expect(screen.getByLabelText("Increase Griha Pravesh Kit")).toBeTruthy();
     expect(screen.getByLabelText("Remove Griha Pravesh Kit")).toBeTruthy();
     expect(screen.getByLabelText("Continue")).toBeTruthy();
+  });
+
+  it("navigates to order review when Continue is pressed", () => {
+    const screen = render(<CartScreen />);
+
+    fireEvent.press(screen.getByLabelText("Continue"));
+
+    expect(mockPush).toHaveBeenCalledWith("/(protected)/order-review");
+  });
+
+  it("blocks Continue while the cart contains unavailable items", () => {
+    jest.mocked(require("@tanstack/react-query").useQuery).mockReturnValueOnce({
+      data: {
+        id: "cart-1",
+        shopId: "shop-1",
+        shopName: "Dharma Store",
+        currency: "INR",
+        items: [{ id: "item-1", productId: "product-1", name: "Out of Stock Kit", quantity: 1, unitPrice: 699, subtotal: 699, available: false }],
+        subtotal: 699,
+        deliveryCharge: 0,
+        serviceCharge: 0,
+        total: 699,
+        itemCount: 1,
+      },
+      isLoading: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+
+    const screen = render(<CartScreen />);
+
+    const continueButton = screen.getByLabelText("Continue");
+    expect(continueButton.props.disabled).toBe(true);
+    expect(screen.getByText("Remove unavailable items")).toBeTruthy();
   });
 });

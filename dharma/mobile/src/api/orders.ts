@@ -76,3 +76,27 @@ export async function getOrders(
 export async function getOrder(orderId: string): Promise<OrderDetails> {
   return (await api.get<OrderDetails>(`/orders/${orderId}`)).data;
 }
+
+export interface CreateOrderRequest {
+  addressId: string;
+}
+
+/** DTO returned by POST /orders (201). Field names follow the create contract. */
+export interface OrderCreated {
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  subtotal: number;
+  deliveryFee: number;
+  serviceCharge: number;
+  total: number;
+  currency: string;
+  createdAtUtc: string;
+}
+
+export async function createOrder(request: CreateOrderRequest, idempotencyKey: string): Promise<OrderCreated> {
+  const response = await api.post<OrderCreated>("/orders", request, {
+    headers: { "Idempotency-Key": idempotencyKey },
+  });
+  return response.data;
+}

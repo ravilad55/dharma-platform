@@ -91,6 +91,7 @@ export default function OrdersScreen() {
     queryFn: ({ pageParam = 1 }) => getOrders({ page: pageParam, pageSize: ordersPageSize }),
     initialPageParam: 1,
     getNextPageParam: getNextOrdersPageParam,
+    enabled: status === "authenticated",
   });
 
   const handleOpenOrder = useCallback(
