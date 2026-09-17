@@ -1,0 +1,1 @@
+export const deviceId = "customer-mobile-device";
