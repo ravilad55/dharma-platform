@@ -3,6 +3,7 @@ using Dharma.Infrastructure.Persistence;
 using Dharma.Infrastructure.Redis;
 using Dharma.Identity.Application;
 using Dharma.Identity.Infrastructure;
+using Dharma.Pandit.Application;
 using Dharma.PoojaSamagri.Application;
 using Dharma.Order.Application;
 using Dharma.Customer.Application;
@@ -20,6 +21,7 @@ public static class DependencyInjection
     {
         services.AddIdentityInfrastructure(configuration, environment);
         services.AddScoped<ICatalogQueryService, PoojaSamagriCatalogQueryService>();
+        services.AddScoped<IPanditQueryService, EfPanditQueryService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICartStore, EfCartStore>();
         services.AddScoped<IOrderCartRevalidationStore, EfCartStore>();

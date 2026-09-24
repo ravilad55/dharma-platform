@@ -1,5 +1,7 @@
 using Dharma.SharedKernel.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Dharma.Infrastructure.Persistence;
 
@@ -26,6 +28,8 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
         public DbSet<OrderStatusHistoryRecord> OrderStatusHistory => Set<OrderStatusHistoryRecord>();
         public DbSet<CustomerAddressRecord> CustomerAddresses => Set<CustomerAddressRecord>();
         public DbSet<OrderIdempotencyRecord> OrderIdempotencyRecords => Set<OrderIdempotencyRecord>();
+        public DbSet<PanditRecord> Pandits => Set<PanditRecord>();
+        public DbSet<PanditServiceRecord> PanditServices => Set<PanditServiceRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -279,6 +283,46 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
             entity.HasIndex(product => new { product.CategoryId, product.IsActive, product.IsAvailable });
             entity.HasOne(product => product.Shop).WithMany().HasForeignKey(product => product.PoojaShopId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(product => product.Category).WithMany().HasForeignKey(product => product.CategoryId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Store the language list as a single delimited column. Keeps the discovery slice simple while
+        // remaining queryable by name. A pipe delimiter avoids collisions with language names.
+        var languagesConverter = new ValueConverter<List<string>, string>(
+            languages => string.Join('|', languages),
+            value => string.IsNullOrEmpty(value) ? new List<string>() : value.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList());
+        var languagesComparer = new ValueComparer<List<string>>(
+            (left, right) => (left ?? new List<string>()).SequenceEqual(right ?? new List<string>()),
+            list => list.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
+            list => list.ToList());
+
+        modelBuilder.Entity<PanditRecord>(entity =>
+        {
+            entity.ToTable("pandits");
+            entity.HasKey(pandit => pandit.Id);
+            entity.Property(pandit => pandit.DisplayName).HasMaxLength(200).IsRequired();
+            entity.Property(pandit => pandit.ImageUrl).HasMaxLength(500);
+            entity.Property(pandit => pandit.ShortDescription).HasMaxLength(2000);
+            entity.Property(pandit => pandit.City).HasMaxLength(100).IsRequired();
+            entity.Property(pandit => pandit.State).HasMaxLength(100).IsRequired();
+            entity.Property(pandit => pandit.Languages).HasMaxLength(500).HasConversion(languagesConverter, languagesComparer);
+            entity.Property(pandit => pandit.Rating).HasPrecision(3, 2);
+            // Discovery filters: browse active pandits by location and availability.
+            entity.HasIndex(pandit => new { pandit.IsActive, pandit.City, pandit.IsAvailable });
+            entity.HasIndex(pandit => new { pandit.IsActive, pandit.State });
+        });
+
+        modelBuilder.Entity<PanditServiceRecord>(entity =>
+        {
+            entity.ToTable("pandit_services");
+            entity.HasKey(service => service.Id);
+            entity.Property(service => service.Name).HasMaxLength(200).IsRequired();
+            entity.Property(service => service.Description).HasMaxLength(2000);
+            entity.Property(service => service.Currency).HasMaxLength(3).IsRequired();
+            entity.Property(service => service.Price).HasPrecision(18, 2);
+            entity.HasIndex(service => new { service.PanditId, service.IsActive });
+            // Restrict delete so a Pandit that is (later) referenced by bookings cannot be removed in a
+            // way that orphans historical service snapshots.
+            entity.HasOne(service => service.Pandit).WithMany().HasForeignKey(service => service.PanditId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

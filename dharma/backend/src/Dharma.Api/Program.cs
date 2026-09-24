@@ -111,6 +111,7 @@ if (app.Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(app.Configurat
     var dbContext = migrationScope.ServiceProvider.GetRequiredService<DharmaDbContext>();
     await dbContext.Database.MigrateAsync();
     await app.Services.SeedDevelopmentCatalogAsync();
+    await app.Services.SeedDevelopmentPanditsAsync();
 }
 
 if (app.Environment.IsDevelopment())

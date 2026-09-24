@@ -20,5 +20,6 @@ This directory is the implementation-ready architecture set for the Dharma Custo
 - [16 Architecture Decisions Required](16-architecture-decisions-required.md)
 - [17 Approved V1 Decisions](17-approved-v1-decisions.md)
 - [18 Final Architecture Readiness](18-final-architecture-readiness.md)
+- [19 Pandit Discovery (DHARMA-BOOKING-01)](19-pandit-discovery.md)
 
 The index is an aid to review; it does not introduce additional product scope.
