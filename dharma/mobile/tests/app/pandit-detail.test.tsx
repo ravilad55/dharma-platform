@@ -1,11 +1,16 @@
 import React from "react";
 import { render } from "@testing-library/react-native";
 
+import { fireEvent } from "@testing-library/react-native";
+
 import PanditDetailScreen from "../../app/(protected)/pandits/[panditId]";
 import { useAuthStore } from "../../src/auth/store";
+import { useServiceSelectionStore } from "../../src/features/pandits/serviceSelectionStore";
+
+const mockPush = jest.fn();
 
 jest.mock("expo-router", () => ({
-  router: { back: jest.fn(), replace: jest.fn(), push: jest.fn() },
+  router: { back: jest.fn(), replace: jest.fn(), push: (...args: unknown[]) => mockPush(...args) },
   Redirect: () => null,
   useLocalSearchParams: () => ({ panditId: "pandit-1" }),
 }));
@@ -48,6 +53,7 @@ const panditDetail = {
   isAvailable: true,
   services: [
     { id: "svc-1", name: "Satyanarayan Puja", description: "Complete Satyanarayan Puja ceremony", durationMinutes: 120, price: 999, currency: "INR" },
+    { id: "svc-2", name: "Griha Pravesh", description: "Housewarming ceremony", durationMinutes: 180, price: 2100, currency: "INR" },
   ],
 };
 
@@ -55,6 +61,7 @@ describe("Pandit detail screen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useAuthStore.setState({ status: "authenticated" });
+    useServiceSelectionStore.getState().clearSelection();
     mockQueryState = { isPending: false, isError: false, data: panditDetail };
   });
 
@@ -72,7 +79,7 @@ describe("Pandit detail screen", () => {
     expect(screen.getByText("18 years experience")).toBeTruthy();
     expect(screen.getByText("Thane, Maharashtra")).toBeTruthy();
     expect(screen.getByText("Marathi • Hindi • Sanskrit")).toBeTruthy();
-    expect(screen.getByText("Services")).toBeTruthy();
+    expect(screen.getByText("Select a Service")).toBeTruthy();
     expect(screen.getByTestId("service-card-svc-1")).toBeTruthy();
     expect(screen.getByText("Satyanarayan Puja")).toBeTruthy();
     expect(screen.getByText("Complete Satyanarayan Puja ceremony")).toBeTruthy();
@@ -80,12 +87,38 @@ describe("Pandit detail screen", () => {
     expect(screen.getByText("From ₹999.00")).toBeTruthy();
   });
 
-  it("shows the next-slice booking note and NO booking action", () => {
+  it("shows the next-slice note and NO booking/payment action", () => {
     const screen = render(<PanditDetailScreen />);
     expect(screen.getByTestId("booking-next-slice-note")).toBeTruthy();
-    expect(screen.getByText("Booking will be available in the next slice.")).toBeTruthy();
     expect(screen.queryByText("Book Now")).toBeNull();
-    expect(screen.queryByText("Book")).toBeNull();
+    expect(screen.queryByText("Pay")).toBeNull();
+  });
+
+  it("has no Continue button until a service is selected", () => {
+    const screen = render(<PanditDetailScreen />);
+    expect(screen.queryByTestId("continue-button")).toBeNull();
+  });
+
+  it("selects a service, keeps only one selected, and retains it in the store", () => {
+    const screen = render(<PanditDetailScreen />);
+    fireEvent.press(screen.getByTestId("service-card-svc-1"));
+    expect(useServiceSelectionStore.getState().selected?.serviceId).toBe("svc-1");
+
+    // Selecting a second service replaces the first (one at a time).
+    fireEvent.press(screen.getByTestId("service-card-svc-2"));
+    expect(useServiceSelectionStore.getState().selected?.serviceId).toBe("svc-2");
+    expect(useServiceSelectionStore.getState().selected?.panditId).toBe("pandit-1");
+  });
+
+  it("shows Continue after selecting and navigates to the confirmation, retaining selection", () => {
+    const screen = render(<PanditDetailScreen />);
+    fireEvent.press(screen.getByTestId("service-card-svc-1"));
+    const continueButton = screen.getByTestId("continue-button");
+    expect(continueButton).toBeTruthy();
+    fireEvent.press(continueButton);
+    expect(mockPush).toHaveBeenCalledWith("/(protected)/pandits/service-selected");
+    // Selection persists after continuing (retained for the next step).
+    expect(useServiceSelectionStore.getState().selected?.serviceName).toBe("Satyanarayan Puja");
   });
 
   it("renders a not-found state for an unknown pandit (404)", () => {

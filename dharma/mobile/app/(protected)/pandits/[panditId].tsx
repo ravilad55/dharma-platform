@@ -12,10 +12,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Pressable } from "react-native";
 
 import { getErrorMessage, getErrorStatus } from "../../../src/api/errors";
-import { getPandit, PanditService } from "../../../src/api/pandits";
+import { getPandit, PanditDetails, PanditService } from "../../../src/api/pandits";
 import { useAuthStore } from "../../../src/auth/store";
 import {
   borderRadius,
+  CheckmarkIcon,
   ClockIcon,
   colors,
   EmptyState,
@@ -27,6 +28,8 @@ import {
   spacing,
 } from "../../../src/design-system";
 import { getLocalPanditImage } from "../../../src/features/pandits/panditImages";
+import { formatDurationLabel } from "../../../src/features/pandits/serviceFormat";
+import { useServiceSelectionStore } from "../../../src/features/pandits/serviceSelectionStore";
 import { formatMoney } from "../../../src/utils/money";
 
 function HeroImage({ imageReference }: { imageReference?: string | null }) {
@@ -40,22 +43,31 @@ function HeroImage({ imageReference }: { imageReference?: string | null }) {
   );
 }
 
-function ServiceCard({ service }: { service: PanditService }) {
-  const hours = Math.floor(service.durationMinutes / 60);
-  const minutes = service.durationMinutes % 60;
-  const duration = hours > 0 ? `${hours} hr${hours > 1 ? "s" : ""}${minutes ? ` ${minutes} min` : ""}` : `${minutes} min`;
+function ServiceCard({ service, selected, onSelect }: { service: PanditService; selected: boolean; onSelect: () => void }) {
   return (
-    <View testID={`service-card-${service.id}`} style={styles.serviceCard}>
-      <Text style={styles.serviceName}>{service.name}</Text>
+    <Pressable
+      testID={`service-card-${service.id}`}
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      accessibilityLabel={`${service.name}, ${formatMoney(service.price, service.currency)}`}
+      onPress={onSelect}
+      style={[styles.serviceCard, selected && styles.serviceCardSelected]}
+    >
+      <View style={styles.serviceHeaderRow}>
+        <Text style={styles.serviceName}>{service.name}</Text>
+        <View testID={`service-radio-${service.id}`} style={[styles.radio, selected && styles.radioSelected]}>
+          {selected ? <CheckmarkIcon size={14} color={colors.white} /> : null}
+        </View>
+      </View>
       {service.description ? <Text style={styles.serviceDescription}>{service.description}</Text> : null}
       <View style={styles.serviceMetaRow}>
         <View style={styles.durationChip}>
           <ClockIcon size={13} color={colors.textMuted} />
-          <Text style={styles.durationText}>Duration: {duration}</Text>
+          <Text style={styles.durationText}>Duration: {formatDurationLabel(service.durationMinutes)}</Text>
         </View>
         <Text style={styles.servicePrice}>From {formatMoney(service.price, service.currency)}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -78,12 +90,33 @@ export default function PanditDetailScreen() {
   const params = useLocalSearchParams<{ panditId: string }>();
   const panditId = Array.isArray(params.panditId) ? params.panditId[0] : params.panditId;
 
+  const selected = useServiceSelectionStore((state) => state.selected);
+  const selectService = useServiceSelectionStore((state) => state.selectService);
+  // Only treat a stored selection as active for the pandit currently being viewed.
+  const selectedServiceId = selected && selected.panditId === panditId ? selected.serviceId : null;
+
   const panditQuery = useQuery({
     queryKey: ["pandit", panditId],
     queryFn: () => getPandit(panditId!),
     enabled: status === "authenticated" && Boolean(panditId),
     retry: (failureCount, error) => getErrorStatus(error) === 404 ? false : failureCount < 2,
   });
+
+  const handleSelect = (pandit: PanditDetails, service: PanditService) => {
+    selectService({
+      panditId: pandit.id,
+      panditName: pandit.displayName,
+      serviceId: service.id,
+      serviceName: service.name,
+      price: service.price,
+      currency: service.currency,
+      durationMinutes: service.durationMinutes,
+    });
+  };
+
+  const handleContinue = () => {
+    router.push("/(protected)/pandits/service-selected");
+  };
 
   if (status === "unauthenticated") {
     return <Redirect href="/(public)/login" />;
@@ -147,24 +180,31 @@ export default function PanditDetailScreen() {
           {languages ? <Text style={styles.languages}>{languages}</Text> : null}
           {pandit.description ? <Text style={styles.description}>{pandit.description}</Text> : null}
 
-          <Text style={styles.sectionTitle}>Services</Text>
+          <Text style={styles.sectionTitle}>Select a Service</Text>
           {pandit.services.length === 0 ? (
             <Text style={styles.noServices}>No services are listed yet.</Text>
           ) : (
             <View style={styles.serviceList}>
               {pandit.services.map((service) => (
-                <ServiceCard key={service.id} service={service} />
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  selected={selectedServiceId === service.id}
+                  onSelect={() => handleSelect(pandit, service)}
+                />
               ))}
             </View>
           )}
 
           <View testID="booking-next-slice-note" style={styles.bookingNote}>
-            <Text style={styles.bookingNoteText}>Booking will be available in the next slice.</Text>
+            <Text style={styles.bookingNoteText}>Date selection and booking will be available in the next slice.</Text>
           </View>
         </View>
       </ScrollView>
     );
   };
+
+  const canContinue = Boolean(pandit) && pandit!.services.length > 0 && selectedServiceId !== null;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
@@ -177,6 +217,19 @@ export default function PanditDetailScreen() {
           <View style={styles.headerButton} />
         </View>
         {renderContent()}
+        {canContinue ? (
+          <View style={styles.footer}>
+            <Pressable
+              testID="continue-button"
+              accessibilityRole="button"
+              accessibilityLabel="Continue with selected service"
+              onPress={handleContinue}
+              style={styles.continueButton}
+            >
+              <Text style={styles.continueButtonText}>Continue</Text>
+            </Pressable>
+          </View>
+        ) : null}
       </View>
     </SafeAreaView>
   );
@@ -209,7 +262,11 @@ const styles = StyleSheet.create({
   noServices: { color: colors.textMuted, fontSize: 14, fontFamily: "Inter" },
   serviceList: { gap: spacing.sm },
   serviceCard: { backgroundColor: colors.cardBackground, borderRadius: borderRadius.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border, ...shadows.sm },
-  serviceName: { color: colors.text, fontSize: 16, fontWeight: "800", fontFamily: "Inter" },
+  serviceCardSelected: { borderColor: colors.primary, borderWidth: 2, backgroundColor: colors.primaryLight },
+  serviceHeaderRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: spacing.sm },
+  radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.border, alignItems: "center", justifyContent: "center" },
+  radioSelected: { borderColor: colors.primary, backgroundColor: colors.primary },
+  serviceName: { flex: 1, color: colors.text, fontSize: 16, fontWeight: "800", fontFamily: "Inter" },
   serviceDescription: { color: colors.textMuted, fontSize: 14, lineHeight: 20, marginTop: spacing.xs, fontFamily: "Inter" },
   serviceMetaRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: spacing.sm },
   durationChip: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
@@ -217,6 +274,9 @@ const styles = StyleSheet.create({
   servicePrice: { color: colors.primary, fontSize: 16, fontWeight: "800", fontFamily: "Inter" },
   bookingNote: { marginTop: spacing.xl, padding: spacing.md, borderRadius: borderRadius.lg, backgroundColor: colors.primaryLight, borderWidth: 1, borderColor: colors.border, alignItems: "center" },
   bookingNoteText: { color: colors.primary, fontSize: 14, fontWeight: "700", fontFamily: "Inter", textAlign: "center" },
+  footer: { padding: spacing.md, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.warmCream },
+  continueButton: { minHeight: 52, alignItems: "center", justifyContent: "center", borderRadius: borderRadius.full, backgroundColor: colors.primary, ...shadows.sm },
+  continueButtonText: { color: colors.white, fontSize: 16, fontWeight: "800", fontFamily: "Inter" },
   loadingContainer: { flex: 1 },
   loadingBody: { paddingHorizontal: spacing.md, paddingTop: spacing.md },
   skeletonLine: { marginTop: spacing.sm },
