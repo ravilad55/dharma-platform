@@ -14,7 +14,14 @@ public static class DevelopmentPanditSeeder
     {
         using var scope = services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<DharmaDbContext>();
-        if (await dbContext.Pandits.AnyAsync(cancellationToken)) return;
+
+        // If pandits already exist (seeded by an earlier slice), only top up booking slots so the
+        // availability feature works on databases created before BOOKING-03.
+        if (await dbContext.Pandits.AnyAsync(cancellationToken))
+        {
+            await SeedSlotsForExistingPanditsAsync(dbContext, cancellationToken);
+            return;
+        }
 
         var now = DateTimeOffset.UtcNow;
 
@@ -30,7 +37,8 @@ public static class DevelopmentPanditSeeder
 
         dbContext.Pandits.AddRange(sharma, iyer, mishra, joshi, trivedi, nair, dubey, rao);
 
-        dbContext.PanditServices.AddRange(
+        var serviceRecords = new[]
+        {
             // Ramesh Sharma
             Service(sharma.Id, "Satyanarayan Puja", "Complete Satyanarayan Puja ceremony with katha and prasad.", 120, 999m, true, now),
             Service(sharma.Id, "Griha Pravesh", "Traditional housewarming ceremony for a new home.", 180, 2100m, true, now),
@@ -60,9 +68,87 @@ public static class DevelopmentPanditSeeder
             // Venkatesh Rao
             Service(rao.Id, "Griha Pravesh", "Telugu-tradition housewarming ceremony.", 180, 2600m, true, now),
             Service(rao.Id, "Satyanarayan Puja", "Satyanarayan vratam with prasadam.", 120, 1150m, true, now),
-            Service(rao.Id, "Wedding Puja", "Traditional Telugu wedding rituals.", 300, 13000m, true, now));
+            Service(rao.Id, "Wedding Puja", "Traditional Telugu wedding rituals.", 300, 13000m, true, now)
+        };
+        dbContext.PanditServices.AddRange(serviceRecords);
+
+        // Availability slots (BOOKING-03): generate explicit slots for each ACTIVE service across the
+        // next 7 days. Times are defined in the display timezone (Asia/Kolkata) and stored in UTC.
+        // Statuses are mixed so the UI shows Available alongside Held/Booked/Blocked.
+        dbContext.BookingSlots.AddRange(BuildSlots(serviceRecords.Where(service => service.IsActive), now));
 
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Tops up booking slots for already-seeded pandits (e.g. databases created before BOOKING-03).
+    /// No-op once any slot exists. Loads active services and generates the same slot grid.
+    /// </summary>
+    private static async Task SeedSlotsForExistingPanditsAsync(DharmaDbContext dbContext, CancellationToken cancellationToken)
+    {
+        if (await dbContext.BookingSlots.AnyAsync(cancellationToken)) return;
+
+        var now = DateTimeOffset.UtcNow;
+        var activeServices = await dbContext.PanditServices.AsNoTracking()
+            .Where(service => service.IsActive)
+            .Join(dbContext.Pandits.AsNoTracking().Where(pandit => pandit.IsActive),
+                service => service.PanditId, pandit => pandit.Id, (service, _) => service)
+            .ToListAsync(cancellationToken);
+        if (activeServices.Count == 0) return;
+
+        dbContext.BookingSlots.AddRange(BuildSlots(activeServices, now));
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    // Local start hours (Asia/Kolkata) for daily slots. Each slot length follows the service duration.
+    private static readonly int[] SlotStartHoursIst = [9, 11, 14, 16, 18];
+    private static readonly BookingSlotStatusValue[] StatusCycle =
+    [
+        BookingSlotStatusValue.Available,
+        BookingSlotStatusValue.Available,
+        BookingSlotStatusValue.Booked,
+        BookingSlotStatusValue.Available,
+        BookingSlotStatusValue.Held,
+        BookingSlotStatusValue.Available,
+        BookingSlotStatusValue.Blocked
+    ];
+
+    private enum BookingSlotStatusValue { Available = 1, Held = 2, Booked = 3, Blocked = 4 }
+
+    private static readonly TimeSpan IstOffset = TimeSpan.FromMinutes(330);
+
+    private static IEnumerable<BookingSlotRecord> BuildSlots(IEnumerable<PanditServiceRecord> activeServices, DateTimeOffset now)
+    {
+        // Start from tomorrow (local) so slots are in the future.
+        var todayIst = now.ToOffset(IstOffset).Date;
+        var cycle = 0;
+
+        foreach (var service in activeServices)
+        {
+            for (var dayOffset = 1; dayOffset <= 7; dayOffset++)
+            {
+                var day = todayIst.AddDays(dayOffset);
+                foreach (var hour in SlotStartHoursIst)
+                {
+                    var startIst = new DateTimeOffset(day.Year, day.Month, day.Day, hour, 0, 0, IstOffset);
+                    var endIst = startIst.AddMinutes(service.DurationMinutes);
+                    var status = StatusCycle[cycle % StatusCycle.Length];
+                    cycle++;
+
+                    yield return new BookingSlotRecord
+                    {
+                        Id = Guid.NewGuid(),
+                        PanditId = service.PanditId,
+                        ServiceId = service.Id,
+                        StartAtUtc = startIst.ToUniversalTime(),
+                        EndAtUtc = endIst.ToUniversalTime(),
+                        Status = (int)status,
+                        CreatedAtUtc = now,
+                        UpdatedAtUtc = now
+                    };
+                }
+            }
+        }
     }
 
     private static PanditRecord Pandit(string id, string displayName, string imageUrl, string shortDescription, int experienceYears, string city, string state, List<string> languages, decimal rating, int reviewCount, bool isAvailable, DateTimeOffset now) => new()

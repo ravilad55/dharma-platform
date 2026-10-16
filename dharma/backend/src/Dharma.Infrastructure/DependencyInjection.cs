@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddIdentityInfrastructure(configuration, environment);
         services.AddScoped<ICatalogQueryService, PoojaSamagriCatalogQueryService>();
         services.AddScoped<IPanditQueryService, EfPanditQueryService>();
+        services.AddScoped<IAvailabilityQueryService, EfAvailabilityQueryService>();
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<ICartStore, EfCartStore>();
         services.AddScoped<IOrderCartRevalidationStore, EfCartStore>();

@@ -74,6 +74,42 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                     b.ToTable("auth_audit_events", (string)null);
                 });
 
+            modelBuilder.Entity("Dharma.Infrastructure.Persistence.BookingSlotRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTimeOffset>("EndAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("PanditId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTimeOffset>("StartAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceId", "Status");
+
+                    b.HasIndex("PanditId", "ServiceId", "StartAtUtc");
+
+                    b.ToTable("booking_slots", (string)null);
+                });
+
             modelBuilder.Entity("Dharma.Infrastructure.Persistence.CartItemRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1002,6 +1038,25 @@ namespace Dharma.Infrastructure.Persistence.Migrations
                     b.HasIndex("CategoryId", "IsActive", "IsAvailable");
 
                     b.ToTable("products", (string)null);
+                });
+
+            modelBuilder.Entity("Dharma.Infrastructure.Persistence.BookingSlotRecord", b =>
+                {
+                    b.HasOne("Dharma.Infrastructure.Persistence.PanditRecord", "Pandit")
+                        .WithMany()
+                        .HasForeignKey("PanditId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Dharma.Infrastructure.Persistence.PanditServiceRecord", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Pandit");
+
+                    b.Navigation("Service");
                 });
 
             modelBuilder.Entity("Dharma.Infrastructure.Persistence.CartItemRecord", b =>

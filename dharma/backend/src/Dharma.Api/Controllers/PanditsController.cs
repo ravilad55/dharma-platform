@@ -13,7 +13,7 @@ namespace Dharma.Api.Controllers;
 [ApiController]
 [Authorize(Roles = "CUSTOMER")]
 [Route("api/v1/pandits")]
-public sealed class PanditsController(IPanditQueryService panditQueryService) : ControllerBase
+public sealed class PanditsController(IPanditQueryService panditQueryService, IAvailabilityQueryService availabilityQueryService) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<PanditSummaryDto>), StatusCodes.Status200OK)]
@@ -53,6 +53,26 @@ public sealed class PanditsController(IPanditQueryService panditQueryService) : 
     {
         var services = await panditQueryService.GetPanditServicesAsync(id, cancellationToken);
         return services is null ? NotFound() : Ok(services);
+    }
+
+    [HttpGet("{id:guid}/availability")]
+    [ProducesResponseType(typeof(AvailabilityDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAvailability(
+        Guid id,
+        [FromQuery] string? date,
+        [FromQuery] Guid? serviceId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var query = AvailabilityQuery.Create(date, serviceId);
+            var availability = await availabilityQueryService.GetAvailabilityAsync(id, query, cancellationToken);
+            return availability is null ? NotFound() : Ok(availability);
+        }
+        catch (AvailabilityQueryException exception) { return Problem(exception.Code, exception.Status, exception.Message, "Availability request is invalid"); }
     }
 
     private ObjectResult Problem(string code, int status, string detail, string title)

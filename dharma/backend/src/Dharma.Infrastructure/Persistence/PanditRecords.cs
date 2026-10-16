@@ -37,3 +37,21 @@ public sealed class PanditServiceRecord
     public DateTimeOffset UpdatedAtUtc { get; set; }
     public PanditRecord Pandit { get; set; } = null!;
 }
+
+/// <summary>
+/// Persistence record for an explicit booking slot. Times are stored in UTC. Status is an int-backed
+/// enum (1 Available, 2 Held, 3 Booked, 4 Blocked). Read-only for BOOKING-03.
+/// </summary>
+public sealed class BookingSlotRecord
+{
+    public Guid Id { get; set; }
+    public Guid PanditId { get; set; }
+    public Guid ServiceId { get; set; }
+    public DateTimeOffset StartAtUtc { get; set; }
+    public DateTimeOffset EndAtUtc { get; set; }
+    public int Status { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
+    public PanditRecord Pandit { get; set; } = null!;
+    public PanditServiceRecord Service { get; set; } = null!;
+}

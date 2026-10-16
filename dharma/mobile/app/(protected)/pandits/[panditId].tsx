@@ -115,7 +115,7 @@ export default function PanditDetailScreen() {
   };
 
   const handleContinue = () => {
-    router.push("/(protected)/pandits/service-selected");
+    router.push("/(protected)/pandits/select-date");
   };
 
   if (status === "unauthenticated") {

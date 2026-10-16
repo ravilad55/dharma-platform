@@ -30,6 +30,7 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
         public DbSet<OrderIdempotencyRecord> OrderIdempotencyRecords => Set<OrderIdempotencyRecord>();
         public DbSet<PanditRecord> Pandits => Set<PanditRecord>();
         public DbSet<PanditServiceRecord> PanditServices => Set<PanditServiceRecord>();
+        public DbSet<BookingSlotRecord> BookingSlots => Set<BookingSlotRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -323,6 +324,19 @@ public sealed class DharmaDbContext(DbContextOptions<DharmaDbContext> options) :
             // Restrict delete so a Pandit that is (later) referenced by bookings cannot be removed in a
             // way that orphans historical service snapshots.
             entity.HasOne(service => service.Pandit).WithMany().HasForeignKey(service => service.PanditId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<BookingSlotRecord>(entity =>
+        {
+            entity.ToTable("booking_slots");
+            entity.HasKey(slot => slot.Id);
+            entity.Property(slot => slot.Status).IsRequired();
+            // Primary availability lookup: slots for a pandit+service ordered by start time.
+            entity.HasIndex(slot => new { slot.PanditId, slot.ServiceId, slot.StartAtUtc });
+            entity.HasIndex(slot => new { slot.ServiceId, slot.Status });
+            // Restrict delete so slots cannot orphan, and future bookings referencing a slot stay safe.
+            entity.HasOne(slot => slot.Pandit).WithMany().HasForeignKey(slot => slot.PanditId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(slot => slot.Service).WithMany().HasForeignKey(slot => slot.ServiceId).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

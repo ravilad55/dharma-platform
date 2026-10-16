@@ -81,3 +81,35 @@ export async function getPandit(panditId: string): Promise<PanditDetails> {
 export async function getPanditServices(panditId: string): Promise<PanditService[]> {
   return (await api.get<PanditService[]>(`/pandits/${panditId}/services`)).data;
 }
+
+export type AvailabilitySlotStatus = "Available" | "Held" | "Booked" | "Blocked";
+
+export interface AvailabilitySlot {
+  id: string;
+  startAt: string;
+  endAt: string;
+  status: AvailabilitySlotStatus;
+}
+
+export interface Availability {
+  date: string;
+  timezone: string;
+  slots: AvailabilitySlot[];
+}
+
+/**
+ * Fetches a pandit's availability for a service on a local calendar date (yyyy-MM-dd). Slot times are
+ * returned in the display timezone reported by the API (Asia/Kolkata for V1).
+ */
+export async function getAvailability(params: {
+  panditId: string;
+  serviceId: string;
+  date: string;
+}): Promise<Availability> {
+  const { panditId, serviceId, date } = params;
+  return (
+    await api.get<Availability>(`/pandits/${panditId}/availability`, {
+      params: { date, serviceId },
+    })
+  ).data;
+}
